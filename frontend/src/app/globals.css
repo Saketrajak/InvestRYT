@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  
+  --card: #141416;
+  --card-hover: #1b1b1e;
+  --card-border: #232326;
+  
+  --primary: #14b8a6; /* Electric Teal */
+  --primary-hover: #0d9488;
+  --primary-rgb: 20, 184, 166;
+  
+  --secondary: #f59e0b; /* Warm Gold */
+  --secondary-rgb: 245, 158, 11;
+  
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  
+  --accent-invest: #10b981; /* Emerald/Green */
+  --accent-pass: #ef4444; /* Red */
+  --accent-hold: #3b82f6; /* Blue */
+  
+  --font-title: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  
+  --glow-teal: 0 0 20px rgba(20, 184, 166, 0.15);
+  --glow-gold: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Animations Helper */
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ApexCharts Overrides for Dark Theme */
+.apexcharts-canvas {
+  background: transparent !important;
+}
+.apexcharts-tooltip {
+  background: var(--card) !important;
+  border: 1px solid var(--card-border) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+}
+.apexcharts-tooltip-title {
+  background: var(--muted) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+}
+.apexcharts-text {
+  fill: var(--muted-foreground) !important;
+  font-family: var(--font-body) !important;
+}
+.apexcharts-gridline {
+  stroke: var(--card-border) !important;
+}
+.apexcharts-radialbar-track {
+  stroke: var(--muted) !important;
+}
