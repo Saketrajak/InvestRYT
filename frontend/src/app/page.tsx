@@ -91,37 +91,53 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#09090b] text-[#f4f4f5] relative">
+    <div className="min-h-[100dvh] flex flex-col relative w-full">
       {/* Background Glows */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/5 rounded-full filter blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full filter blur-[100px] pointer-events-none" />
 
       {/* HEADER NAVBAR */}
-      <header className="sticky top-0 z-50 w-full bg-[#09090b]/80 backdrop-blur-md border-b border-[#232326] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 bg-[#141416] border border-[#232326] rounded-lg shadow-md">
-            <Cpu className="h-4 w-4 text-teal-400" />
+      <div className="sticky top-6 z-50 w-full max-w-[1400px] px-8 self-center">
+        <header className="w-full bg-[#09090b]/80 backdrop-blur-xl border border-[#232326] rounded-full px-8 py-4 flex justify-between items-center shadow-2xl shadow-black/50">
+          
+          {/* Left: Logo */}
+          <div className="flex items-center">
+            <img src="/investryt.svg" alt="Investryt Logo" className="h-8 w-auto object-contain" />
           </div>
-          <div>
-            <span className="font-extrabold text-lg tracking-tight text-white">
-              Investryt <span className="text-teal-400">AI</span>
-            </span>
-            <span className="text-[10px] text-zinc-500 font-bold tracking-wider uppercase ml-2 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded-md hidden sm:inline-block">
-              Artifact Workspace
-            </span>
-          </div>
-        </div>
 
-        {(report || loading) && (
-          <button
-            onClick={handleNewResearch}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-[#232326] hover:border-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs font-semibold transition-all"
-          >
-            <RefreshCw className="h-3 w-3" />
-            New Research
-          </button>
-        )}
-      </header>
+          {/* Center: Navigation (Hidden on small screens) */}
+          <nav className="hidden md:flex items-center gap-8">
+            <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Research</button>
+            <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Features</button>
+            <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Documentation</button>
+            <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">API</button>
+            <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">GitHub</button>
+          </nav>
+
+          {/* Right: Actions */}
+          <div className="flex items-center">
+            {(report || loading) ? (
+              <button
+                onClick={handleNewResearch}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-purple-600 hover:from-cyan-300 hover:to-purple-500 text-white rounded-full text-sm font-semibold transition-all shadow-lg shadow-purple-500/20"
+              >
+                <RefreshCw className="h-4 w-4" />
+                New Research
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+                  if (searchInput) searchInput.focus();
+                }}
+                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-cyan-400 to-purple-600 hover:from-cyan-300 hover:to-purple-500 text-white rounded-full text-sm font-semibold transition-all shadow-lg shadow-purple-500/20"
+              >
+                Start Researching &rarr;
+              </button>
+            )}
+          </div>
+        </header>
+      </div>
 
       {/* ERROR BANNER */}
       {error && (
@@ -328,7 +344,7 @@ export default function Home() {
 
       {/* FOOTER (Only shown on search landing page to keep workspace full height) */}
       {!loading && !report && (
-        <footer className="w-full bg-[#09090b] border-t border-[#232326] px-6 py-6 text-center text-xs text-zinc-600 font-light flex flex-col sm:flex-row justify-between items-center gap-4">
+        <footer className="w-full bg-[#09090b] border-t border-[#232326] px-6 py-6 text-center text-xs text-zinc-600 font-light flex flex-col sm:flex-row justify-between items-center gap-4 z-20 relative">
           <div>
             © 2026 Investryt AI. All rights reserved. Developed for InsideIIM × Altuni AI Labs.
           </div>
