@@ -93,20 +93,29 @@ export default function Home() {
   return (
     <div className="min-h-[100dvh] flex flex-col relative w-full">
       {/* Background Glows */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/5 rounded-full filter blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full filter blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-500/5 rounded-full filter blur-[100px] pointer-events-none z-0" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full filter blur-[100px] pointer-events-none z-0" />
+
+      {/* GLOBAL GRID LINES */}
+      <div className="fixed inset-0 pointer-events-none flex justify-center z-40">
+        <div className="w-full max-w-[1400px] h-full border-l border-r border-zinc-700/60" />
+      </div>
 
       {/* HEADER NAVBAR */}
-      <div className="sticky top-6 z-50 w-full max-w-[1400px] px-8 self-center">
-        <header className="w-full bg-[#09090b]/80 backdrop-blur-xl border border-[#232326] rounded-full px-8 py-4 flex justify-between items-center shadow-2xl shadow-black/50">
+      <div className="sticky top-0 z-50 w-full border-b border-zinc-700/60 bg-[#09090b]/80 backdrop-blur-xl flex justify-center">
+        <div className="w-full max-w-[1400px] relative h-24 flex items-center">
           
-          {/* Left: Logo */}
-          <div className="flex items-center">
-            <img src="/investryt.svg" alt="Investryt Logo" className="h-8 w-auto object-contain" />
+          {/* Left: Logo (Aligned to 1400px grid line) */}
+          <div className="absolute left-0 flex items-center">
+            <img src="/investryt.svg" alt="Investryt Logo" className="h-12 w-auto object-contain" />
           </div>
 
-          {/* Center: Navigation (Hidden on small screens) */}
-          <nav className="hidden md:flex items-center gap-8">
+          <header className="w-full max-w-[1150px] mx-auto px-6 h-full flex justify-between items-center">
+            {/* Invisible placeholder to keep header layout balanced */}
+            <div className="w-[150px] shrink-0" />
+
+            {/* Center: Navigation (Hidden on small screens) */}
+            <nav className="hidden md:flex items-center gap-8">
             <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Research</button>
             <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Features</button>
             <button className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Documentation</button>
@@ -137,6 +146,7 @@ export default function Home() {
             )}
           </div>
         </header>
+        </div>
       </div>
 
       {/* ERROR BANNER */}
