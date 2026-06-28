@@ -43,13 +43,13 @@ const marqueeImages = [
   "/5.png?v=2", "/6.png?v=2", "/2.png?v=2", "/4.png?v=2", "/1.png?v=2",
   "/6.png?v=2", "/4.png?v=2", "/5.png?v=2", "/1.png?v=2", "/2.png?v=2",
   "/4.png?v=2", "/1.png?v=2", "/6.png?v=2", "/2.png?v=2", "/5.png?v=2",
-  
+
   "/1.png?v=2", "/2.png?v=2", "/4.png?v=2", "/5.png?v=2", "/6.png?v=2",
   "/2.png?v=2", "/5.png?v=2", "/1.png?v=2", "/6.png?v=2", "/4.png?v=2",
   "/5.png?v=2", "/6.png?v=2", "/2.png?v=2", "/4.png?v=2", "/1.png?v=2",
   "/6.png?v=2", "/4.png?v=2", "/5.png?v=2", "/1.png?v=2", "/2.png?v=2",
   "/4.png?v=2", "/1.png?v=2", "/6.png?v=2", "/2.png?v=2", "/5.png?v=2",
-  
+
   "/1.png?v=2", "/2.png?v=2", "/4.png?v=2", "/5.png?v=2", "/6.png?v=2",
   "/2.png?v=2", "/5.png?v=2", "/1.png?v=2", "/6.png?v=2", "/4.png?v=2",
   "/5.png?v=2", "/6.png?v=2", "/2.png?v=2", "/4.png?v=2", "/1.png?v=2",
@@ -162,7 +162,7 @@ export default function SearchHero({ onSearch, loading }: SearchHeroProps) {
       {/* Company Logos Marquee */}
       <div className="w-full absolute bottom-0 z-10 border-t border-b border-zinc-700/60 flex justify-center bg-transparent">
         <div className="w-full max-w-[1400px] bg-white overflow-hidden py-10 min-h-[80px] flex items-center justify-center">
-          <InfiniteMovingCards items={companies} direction="right" speed="slow" pauseOnHover={false} />
+          <InfiniteMovingCards items={companies} direction="left" speed="slow" pauseOnHover={true} />
         </div>
       </div>
 

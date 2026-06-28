@@ -86,7 +86,7 @@ export const InfiniteMovingCards = ({
       >
         {items.map((item, idx) => (
           <li
-            className="relative shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity duration-300"
+            className="relative shrink-0 flex items-center justify-center"
             key={item.alt + idx}
           >
             <img src={item.src} alt={item.alt} className="h-10 md:h-12 w-auto object-contain" />
