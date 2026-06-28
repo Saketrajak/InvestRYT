@@ -39,14 +39,20 @@ export function getGeminiModel(options: ModelOptions = {}): ChatGoogle {
 
 // ---- Helpers ----
 
-function isRateLimitError(errorMsg: string): boolean {
+function isRateLimitError(err: any, errorMsg: string): boolean {
+  // Check HTTP status code if available
+  if (err?.status === 429 || err?.response?.status === 429) return true;
+  // Check nested error objects
+  if (err?.error?.message && String(err.error.message).toLowerCase().includes('quota')) return true;
+
   const lower = errorMsg.toLowerCase();
   return (
     lower.includes('quota exceeded') ||
     lower.includes('quota') ||
     lower.includes('rate limit') ||
     lower.includes('429') ||
-    lower.includes('resource_exhausted')
+    lower.includes('resource_exhausted') ||
+    lower.includes('please retry')
   );
 }
 
@@ -60,8 +66,7 @@ function extractRetryDelay(errorMsg: string): number {
 
 /**
  * Invoke Gemini with built-in API key rotation on rate-limit errors.
- * If the first key hits a quota/rate-limit error, it is marked cooldown
- * and the call is retried once with the next available key.
+ * Cycles through ALL available keys until one succeeds or all are in cooldown.
  */
 export async function invokeGemini(
   messages: BaseMessage[],
@@ -70,7 +75,18 @@ export async function invokeGemini(
   const pool = getGeminiPool();
   let lastError: any;
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // Try up to pool.size times — with 20+ keys we need to cycle through them all
+  const maxAttempts = Math.max(2, pool.size);
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // If all keys are in cooldown, no point retrying further
+    if (attempt > 0 && pool.availableCount === 0) {
+      console.warn(
+        `[AiService] All ${pool.size} Gemini keys in cooldown — cannot retry.`
+      );
+      break;
+    }
+
     const apiKey = pool.getKey();
 
     try {
@@ -89,11 +105,11 @@ export async function invokeGemini(
       lastError = err;
       const errorMsg = String(err.message || err);
 
-      if (isRateLimitError(errorMsg)) {
+      if (isRateLimitError(err, errorMsg)) {
         const cooldownMs = extractRetryDelay(errorMsg);
         pool.markRateLimited(apiKey, cooldownMs);
         console.warn(
-          `[AiService] Gemini key ***${apiKey.slice(-4)} rate-limited, rotating (cooldown: ${cooldownMs}ms)`
+          `[AiService] Gemini key ***${apiKey.slice(-4)} rate-limited, rotating (cooldown: ${cooldownMs}ms, available: ${pool.availableCount}/${pool.size})`
         );
         continue; // Retry with next key
       }
@@ -103,6 +119,6 @@ export async function invokeGemini(
     }
   }
 
-  // Both attempts exhausted
+  // All keys exhausted or a non-rate-limit error occurred
   throw lastError;
 }
