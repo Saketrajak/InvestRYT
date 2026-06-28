@@ -148,9 +148,9 @@ export default function ReportDetails({
 
   // Verdict designs
   const verdictConfig = {
-    INVEST: { bg: 'bg-[#10b981]/10', border: 'border-[#10b981]/30', text: 'text-[#10b981]', dot: 'bg-[#10b981]' },
-    PASS: { bg: 'bg-[#ef4444]/10', border: 'border-[#ef4444]/30', text: 'text-[#ef4444]', dot: 'bg-[#ef4444]' },
-    HOLD: { bg: 'bg-[#3b82f6]/10', border: 'border-[#3b82f6]/30', text: 'text-[#3b82f6]', dot: 'bg-[#3b82f6]' },
+    INVEST: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-400', dot: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' },
+    PASS: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', dot: 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]' },
+    HOLD: { bg: 'bg-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-400', dot: 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
   };
 
   const currentVerdict = report.verdict.toUpperCase() as 'INVEST' | 'PASS' | 'HOLD';
@@ -173,8 +173,8 @@ export default function ReportDetails({
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 flex flex-col gap-6">
       {/* Tab Controls (Hidden during PDF export) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#232326] pb-4 gap-4">
-        <div className="flex flex-wrap gap-1 bg-[#141416] p-1.5 rounded-xl border border-[#232326]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-zinc-800/80 pb-4 gap-4">
+        <div className="flex flex-wrap gap-1 bg-zinc-900/40 backdrop-blur-sm shadow-sm p-1.5 rounded-xl border border-zinc-800/80">
           {navTabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -185,7 +185,7 @@ export default function ReportDetails({
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
                   active
                     ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-[#1b1b1e]'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -198,7 +198,7 @@ export default function ReportDetails({
         <button
           onClick={handlePdfExport}
           disabled={exporting}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#141416] hover:bg-[#1b1b1e] border border-[#232326] hover:border-zinc-700 text-zinc-300 hover:text-white rounded-xl font-medium transition-all text-xs uppercase tracking-wider"
+          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/40 backdrop-blur-sm shadow-sm hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white rounded-xl font-medium transition-all text-xs uppercase tracking-wider"
         >
           <Download className={`h-4 w-4 ${exporting ? 'animate-spin' : ''}`} />
           {exporting ? 'Printing PDF...' : 'Download Full PDF Report'}
@@ -209,10 +209,10 @@ export default function ReportDetails({
       <div
         ref={reportRef}
         id="report-container"
-        className="w-full bg-[#09090b] text-[#f4f4f5] border border-[#232326] rounded-2xl overflow-hidden p-6 md:p-8 flex flex-col gap-8 shadow-2xl"
+        className="w-full bg-transparent text-[#f4f4f5] border-none rounded-2xl overflow-hidden p-6 md:p-8 flex flex-col gap-8 shadow-none"
       >
         {/* SECTION 1: Report Title Header Panel (Always Visible) */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#232326] pb-6 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800/80 pb-6 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2 flex-wrap">
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">{profile.name}</h1>
@@ -235,7 +235,7 @@ export default function ReportDetails({
               <span className="font-bold tracking-wider text-sm">VERDICT: {report.verdict}</span>
             </div>
 
-            <div className="bg-[#141416] border border-[#232326] px-4 py-1.5 rounded-xl text-center">
+            <div className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 px-4 py-1.5 rounded-xl text-center">
               <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Confidence</div>
               <div className="text-lg font-bold text-amber-500">{report.confidenceScore}%</div>
             </div>
@@ -257,7 +257,7 @@ export default function ReportDetails({
                 { label: 'ROE (TTM)', val: formatPercentage(metrics.roe), icon: Activity, color: 'text-purple-400' },
                 { label: 'Dividend Yield', val: formatPercentage(metrics.dividendYield), icon: Globe, color: 'text-emerald-400' },
               ].map((item, idx) => (
-                <div key={idx} className="bg-[#141416] border border-[#232326] p-4 rounded-xl flex flex-col justify-between h-24">
+                <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between h-24">
                   <div className="flex justify-between items-center text-xs text-zinc-500 font-bold uppercase tracking-wider">
                     <span>{item.label}</span>
                     <item.icon className={`h-4 w-4 ${item.color}`} />
@@ -279,21 +279,21 @@ export default function ReportDetails({
                 </p>
               </div>
 
-              <div className="lg:col-span-4 bg-[#141416] border border-[#232326] p-5 rounded-xl flex flex-col gap-4">
+              <div className="lg:col-span-4 bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-5 rounded-xl flex flex-col gap-4">
                 <h3 className="text-md font-bold text-white flex items-center gap-2">
                   <Users className="h-5 w-5 text-teal-500" />
                   Corporate Details
                 </h3>
                 <div className="flex flex-col gap-3 text-sm">
-                  <div className="flex justify-between border-b border-[#232326] pb-2">
+                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
                     <span className="text-zinc-500 font-medium">Headquarters</span>
                     <span className="text-zinc-300 font-semibold">{profile.country || 'N/A'}</span>
                   </div>
-                  <div className="flex justify-between border-b border-[#232326] pb-2">
+                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
                     <span className="text-zinc-500 font-medium">Employees</span>
                     <span className="text-zinc-300 font-semibold">{formatNumber(profile.employees)}</span>
                   </div>
-                  <div className="flex justify-between border-b border-[#232326] pb-2">
+                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
                     <span className="text-zinc-500 font-medium">Currency</span>
                     <span className="text-zinc-300 font-semibold uppercase">{profile.currency}</span>
                   </div>
@@ -325,7 +325,7 @@ export default function ReportDetails({
               {priceHistory.length > 0 ? (
                 <StockPriceChart prices={priceHistory} ticker={profile.ticker} currency={profile.currency} />
               ) : (
-                <div className="w-full h-80 bg-[#141416] border border-[#232326] rounded-xl flex items-center justify-center text-zinc-500">
+                <div className="w-full h-80 bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 rounded-xl flex items-center justify-center text-zinc-500">
                   Stock Price History Unavailable
                 </div>
               )}
@@ -339,7 +339,7 @@ export default function ReportDetails({
 
             {/* Narratives breakdown */}
             <div className="flex flex-col gap-6">
-              <h2 className="text-lg font-bold text-white border-b border-[#232326] pb-3 uppercase tracking-wider">Institutional Financial Analysis</h2>
+              <h2 className="text-lg font-bold text-white border-b border-zinc-800/80 pb-3 uppercase tracking-wider">Institutional Financial Analysis</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
                   { title: 'Revenue & Growth Engine', content: report.financialAnalysis.revenueAnalysis },
@@ -347,7 +347,7 @@ export default function ReportDetails({
                   { title: 'Valuation & Multiples Assessment', content: report.financialAnalysis.valuationAnalysis },
                   { title: 'Balance Sheet, Leverage & Credit', content: report.financialAnalysis.debtAnalysis },
                 ].map((section, idx) => (
-                  <div key={idx} className="bg-[#141416]/50 border border-[#232326] p-5 rounded-xl flex flex-col gap-2">
+                  <div key={idx} className="bg-zinc-900/20 border border-zinc-800/80 p-5 rounded-xl flex flex-col gap-2">
                     <h3 className="text-sm font-bold text-teal-400 uppercase tracking-wider">{section.title}</h3>
                     <p className="text-zinc-300 text-xs leading-relaxed whitespace-pre-line font-light">
                       {section.content}
@@ -367,7 +367,7 @@ export default function ReportDetails({
                 <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line font-light">
                   {report.moatAnalysis}
                 </p>
-                <div className="bg-[#141416] p-4 rounded-xl border border-[#232326] text-sm text-zinc-300">
+                <div className="bg-zinc-900/40 backdrop-blur-sm shadow-sm p-4 rounded-xl border border-zinc-800/80 text-sm text-zinc-300">
                   <strong className="text-white">Competitive Position Summary:</strong>
                   <div className="mt-2 text-xs text-zinc-400 leading-relaxed font-light">
                     {report.competitiveLandscape}
@@ -382,7 +382,7 @@ export default function ReportDetails({
                 </h2>
                 <div className="flex flex-col gap-3">
                   {report.growthCatalysts.map((catalyst, idx) => (
-                    <div key={idx} className="flex gap-3 items-start bg-[#141416]/80 p-3 rounded-lg border border-[#232326]">
+                    <div key={idx} className="flex gap-3 items-start bg-zinc-900/60 p-3 rounded-lg border border-zinc-800/80">
                       <span className="h-5 w-5 bg-teal-500/10 text-teal-400 text-xs font-bold rounded-full flex items-center justify-center shrink-0 border border-teal-500/20 mt-0.5">
                         {idx + 1}
                       </span>
@@ -409,7 +409,7 @@ export default function ReportDetails({
                   const bc = badgeColors[r.severity.toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW'] || badgeColors.MEDIUM;
 
                   return (
-                    <div key={idx} className="bg-[#141416] border border-[#232326] p-4 rounded-xl flex flex-col justify-between gap-3">
+                    <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between gap-3">
                       <p className="text-zinc-300 text-xs leading-relaxed font-light">{r.risk}</p>
                       <span className={`self-start px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${bc}`}>
                         {r.severity} Severity
@@ -446,10 +446,10 @@ export default function ReportDetails({
         {(activeTab === 'excel' || exporting) && (
           <div className="flex flex-col gap-4">
             {exporting && <h2 className="text-xl font-bold text-white border-b border-zinc-800/80 pb-2 mt-8 uppercase tracking-wider">Historical financial statements</h2>}
-            <div className="w-full overflow-x-auto rounded-xl border border-[#232326]">
+            <div className="w-full overflow-x-auto rounded-xl border border-zinc-800/80 shadow-sm">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-[#141416] border-b border-[#232326]">
+                  <tr className="bg-zinc-900/60 border-b border-zinc-800/80">
                     <th className="p-3 text-zinc-400 font-bold uppercase tracking-wider min-w-[180px]">Metric ({profile.currency})</th>
                     {financials.incomeStatements.map((item) => (
                       <th key={item.date} className="p-3 text-zinc-300 font-bold uppercase tracking-wider text-right">
@@ -458,9 +458,9 @@ export default function ReportDetails({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#232326]">
+                <tbody className="divide-y divide-zinc-800/80 bg-zinc-900/20 backdrop-blur-sm">
                   {/* Income Statement */}
-                  <tr className="bg-[#141416]/20 font-bold"><td className="p-3 text-teal-400" colSpan={financials.incomeStatements.length + 1}>INCOME STATEMENT</td></tr>
+                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-teal-400" colSpan={financials.incomeStatements.length + 1}>INCOME STATEMENT</td></tr>
                   <tr>
                     <td className="p-3 text-zinc-400 font-medium">Revenue</td>
                     {financials.incomeStatements.map((item) => (
@@ -485,7 +485,7 @@ export default function ReportDetails({
                       <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.operatingIncome, profile.currency)}</td>
                     ))}
                   </tr>
-                  <tr className="border-b border-[#232326]">
+                  <tr className="border-b border-zinc-800/80">
                     <td className="p-3 text-zinc-400 font-medium">Net Income</td>
                     {financials.incomeStatements.map((item) => (
                       <td key={item.date} className="p-3 text-right text-teal-400 font-bold">{formatCurrency(item.netIncome, profile.currency)}</td>
@@ -493,7 +493,7 @@ export default function ReportDetails({
                   </tr>
 
                   {/* Balance Sheet */}
-                  <tr className="bg-[#141416]/20 font-bold"><td className="p-3 text-amber-500" colSpan={financials.incomeStatements.length + 1}>BALANCE SHEET</td></tr>
+                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-amber-500" colSpan={financials.incomeStatements.length + 1}>BALANCE SHEET</td></tr>
                   <tr>
                     <td className="p-3 text-zinc-400 font-medium">Total Assets</td>
                     {financials.balanceSheets.map((item) => (
@@ -512,7 +512,7 @@ export default function ReportDetails({
                       <td key={item.date} className="p-3 text-right text-zinc-300 font-semibold">{formatCurrency(item.totalEquity, profile.currency)}</td>
                     ))}
                   </tr>
-                  <tr className="border-b border-[#232326]">
+                  <tr className="border-b border-zinc-800/80">
                     <td className="p-3 text-zinc-400 font-medium">Total Debt</td>
                     {financials.balanceSheets.map((item) => (
                       <td key={item.date} className="p-3 text-right text-red-400">{formatCurrency(item.totalDebt, profile.currency)}</td>
@@ -520,7 +520,7 @@ export default function ReportDetails({
                   </tr>
 
                   {/* Cash Flow */}
-                  <tr className="bg-[#141416]/20 font-bold"><td className="p-3 text-blue-400" colSpan={financials.incomeStatements.length + 1}>CASH FLOW STATEMENT</td></tr>
+                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-blue-400" colSpan={financials.incomeStatements.length + 1}>CASH FLOW STATEMENT</td></tr>
                   <tr>
                     <td className="p-3 text-zinc-400 font-medium">Operating Cash Flow</td>
                     {financials.cashFlows.map((item) => (
@@ -579,7 +579,7 @@ export default function ReportDetails({
                 const sc = sentimentConfig[item.sentiment.toUpperCase() as 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL'] || sentimentConfig.NEUTRAL;
 
                 return (
-                  <div key={idx} className="bg-[#141416] border border-[#232326] p-4 rounded-xl flex flex-col justify-between gap-3 hover:border-zinc-700 transition-all">
+                  <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between gap-3 hover:border-zinc-700 transition-all">
                     <div>
                       <div className="flex justify-between items-start gap-2 mb-2">
                         <h4 className="text-xs font-bold text-white line-clamp-1">{item.title}</h4>
@@ -605,7 +605,7 @@ export default function ReportDetails({
         )}
 
         {/* SECTION 10: Disclaimer & Sensitivity Notes Footer (Always Visible) */}
-        <div className="border-t border-[#232326] pt-6 flex flex-col md:flex-row justify-between text-[10px] text-zinc-500 gap-4 leading-relaxed font-light border-zinc-800/80">
+        <div className="border-t border-zinc-800/80 pt-6 flex flex-col md:flex-row justify-between text-[10px] text-zinc-500 gap-4 leading-relaxed font-light">
           <div className="md:max-w-xl">
             <strong className="text-zinc-400">Institutional Disclaimer:</strong> This equity research analysis is compiled automatically by Investryt AI based on LLM-synthesized data and financial wrappers. It does not constitute formal, licensed financial advice. Past performance is not indicative of future market returns.
           </div>

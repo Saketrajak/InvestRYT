@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from 'next/font/google';
 import "./globals.css";
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: "Investryt AI — Agentic Investment Research Terminal",
@@ -17,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-[100dvh] bg-[#09090b] text-[#f4f4f5] overflow-x-hidden selection:bg-purple-400/30 selection:text-white">
+      <body className={`${inter.className} antialiased min-h-[100dvh] bg-[#09090b] text-zinc-400 overflow-x-hidden selection:bg-purple-400/30 selection:text-white`}>
         {children}
       </body>
     </html>

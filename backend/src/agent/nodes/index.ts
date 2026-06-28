@@ -434,26 +434,43 @@ export async function reportGenerationNode(state: AgentStateType, config?: any) 
       .replace('{companyName}', company.name)
       .replace('{ticker}', company.ticker);
 
-    const response = await model.invoke([
-      new HumanMessage(`Core analysis raw content:\n${analysisText}\n\nUser raw search query was: ${state.userInput}\n\nNow, compile the final report.`),
-      new HumanMessage(formattedPrompt)
-    ]);
-
-    const textContent = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
-
     let report = null;
-    try {
-      const parsed = JSON.parse(textContent.trim());
-      // Populate standard items that should mirror inputs
-      parsed.companyName = company.name;
-      parsed.ticker = company.ticker;
-      parsed.exchange = state.profile?.exchange || company.exchange;
-      parsed.sector = state.profile?.sector || parsed.sector || '';
-      parsed.newsItems = state.newsItems; // carry news items through
-      
-      report = parsed;
-    } catch (e) {
-      console.error('[Nodes] Failed to parse final report JSON:', textContent, e);
+    let textContent = '';
+
+    for (let i = 0; i < 3; i++) {
+      try {
+        const response = await model.invoke([
+          new HumanMessage(`Core analysis raw content:\n${analysisText}\n\nUser raw search query was: ${state.userInput}\n\nNow, compile the final report.`),
+          new HumanMessage(formattedPrompt)
+        ]);
+
+        textContent = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
+        let cleanText = textContent.trim();
+        const startIndex = cleanText.indexOf('{');
+        const endIndex = cleanText.lastIndexOf('}');
+        if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+          cleanText = cleanText.substring(startIndex, endIndex + 1);
+        }
+        
+        // Remove unescaped control characters (like raw newlines) inside JSON strings
+        cleanText = cleanText.replace(/[\u0000-\u001F]+/g, " ");
+
+        const parsed = JSON.parse(cleanText);
+        // Populate standard items that should mirror inputs
+        parsed.companyName = company.name;
+        parsed.ticker = company.ticker;
+        parsed.exchange = state.profile?.exchange || company.exchange;
+        parsed.sector = state.profile?.sector || parsed.sector || '';
+        parsed.newsItems = state.newsItems; // carry news items through
+        
+        report = parsed;
+        break; // Successfully parsed!
+      } catch (e) {
+        console.error(`[Nodes] Failed to parse final report JSON (Attempt ${i + 1}):`, textContent, e);
+        if (i === 2) {
+          break; // Stop after 3 attempts
+        }
+      }
     }
 
     if (!report) {

@@ -5,10 +5,13 @@
 // ============================================================
 
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useResearchAgent } from './hooks/useResearchAgent';
 import { useChat } from './hooks/useChat';
 import SearchHero from './components/SearchHero';
-import AgentProgress from './components/AgentProgress';
+import AgentPipeline from './components/AgentPipeline';
+import AgentTerminal from './components/AgentTerminal';
+import ReportSkeleton from './components/ReportSkeleton';
 import ReportDetails from './components/reportDetails';
 import {
   Sparkles,
@@ -102,7 +105,7 @@ export default function Home() {
       </div>
 
       {/* HEADER NAVBAR */}
-      <div className="sticky top-0 z-50 w-full border-b border-zinc-700/60 bg-[#09090b]/80 backdrop-blur-xl flex justify-center">
+      <div className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-2xl flex justify-center shadow-sm">
         <div className="w-full max-w-[1400px] relative h-24 flex items-center">
           
           {/* Left: Logo (Aligned to 1400px grid line) */}
@@ -170,49 +173,83 @@ export default function Home() {
 
       {/* MAIN CONTAINER PANEL */}
       <main className="flex-1 w-full relative z-10 flex flex-col justify-center">
-        {/* State A: Landing Page Search */}
-        {!loading && !report && (
-          <SearchHero onSearch={handleStartResearch} loading={loading} />
-        )}
-
-        {/* State B: Research Pipeline / Workspace (Split Panel layout) */}
-        {(loading || report) && (
-          <div className="flex flex-col lg:flex-row w-full h-[calc(100vh-70px)] border-t border-[#232326]">
-            
-            {/* LEFT PANEL: Log Stream (loading) OR Chat Console (complete) */}
-            <div className="w-full lg:w-[400px] border-r border-[#232326] bg-[#0c0c0e] flex flex-col h-full shrink-0">
+        <AnimatePresence mode="wait">
+          {/* State A: Landing Page Search */}
+          {!loading && !report ? (
+            <motion.div
+              key="landing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+              transition={{ duration: 0.4 }}
+              className="flex-1 w-full flex flex-col"
+            >
+              <SearchHero onSearch={handleStartResearch} loading={loading} />
+            </motion.div>
+          ) : (
+            /* State B: Research Pipeline / Workspace (3-Column Layout) */
+            <motion.div
+              key="workspace"
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5, ease: "easeOut", staggerChildren: 0.1 }}
+              className="flex flex-col lg:flex-row w-full max-w-[1600px] mx-auto h-[calc(100vh-120px)] p-8 lg:p-8 gap-6 relative z-10"
+            >
               
-              {loading ? (
-                // 1. Loading Step Progress Logs
-                <div className="flex-1 overflow-y-auto p-5">
-                  <AgentProgress
-                    currentStep={currentStep}
-                    stepStatus={stepStatus}
-                    stepMessage={stepMessage}
-                    progressLog={progressLog}
-                    onCancel={cancelResearch}
-                  />
-                </div>
-              ) : (
-                // 2. Chat Console Dialog
-                <div className="flex flex-col h-full">
-                  <div className="px-5 py-4 border-b border-[#232326] bg-[#101012] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-teal-400" />
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">Research Assistant</span>
+              {/* LEFT (25%) - Agent Pipeline */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="w-full lg:w-[25%] h-full shrink-0"
+              >
+                <AgentPipeline
+                  currentStep={currentStep}
+                  stepStatus={stepStatus}
+                  progressLog={progressLog}
+                  onCancel={cancelResearch}
+                />
+              </motion.div>
+
+              {/* CENTER (35%) - Terminal / Chat Console */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="w-full lg:w-[35%] h-full shrink-0 flex flex-col gap-6"
+              >
+                <AnimatePresence mode="wait">
+                  {loading ? (
+                    <motion.div key="terminal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+                      <AgentTerminal
+                        currentStep={currentStep}
+                        stepStatus={stepStatus}
+                        progressLog={progressLog}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full bg-[linear-gradient(180deg,rgba(24,24,27,.9),rgba(14,14,16,.95))] border border-zinc-800 rounded-3xl p-8 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.4)] relative overflow-hidden glass-reflection">
+                  <div className="border-b border-zinc-800/80 pb-4 flex items-center justify-between z-10 relative">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-zinc-900/80 rounded-xl border border-zinc-800 shadow-inner">
+                        <MessageSquare className="h-4 w-4 text-teal-400" />
+                      </div>
+                      <span className="text-sm font-bold text-white tracking-wide">Research Assistant</span>
                     </div>
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
                   </div>
 
                   {/* Persona Selector Row */}
-                  <div className="px-3 py-2 bg-[#141416]/40 border-b border-[#232326] flex gap-1 justify-between items-center text-[10px] font-bold">
+                  <div className="py-3 flex gap-2 justify-between items-center text-[11px] font-bold z-10 relative">
                     <button
                       type="button"
                       onClick={() => setPersona('value')}
-                      className={`flex-1 py-1.5 rounded-lg border transition-all text-center ${
+                      className={`flex-1 py-2 rounded-xl border transition-all text-center ${
                         persona === 'value'
                           ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-sm'
-                          : 'border-transparent hover:border-zinc-850 text-zinc-500 hover:text-zinc-300'
+                          : 'bg-zinc-900/30 border-zinc-800/50 hover:bg-zinc-900 text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
                       🛡️ Value
@@ -220,10 +257,10 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setPersona('growth')}
-                      className={`flex-1 py-1.5 rounded-lg border transition-all text-center ${
+                      className={`flex-1 py-2 rounded-xl border transition-all text-center ${
                         persona === 'growth'
                           ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-sm'
-                          : 'border-transparent hover:border-zinc-850 text-zinc-500 hover:text-zinc-300'
+                          : 'bg-zinc-900/30 border-zinc-800/50 hover:bg-zinc-900 text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
                       ⚡ Growth
@@ -231,10 +268,10 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setPersona('bear')}
-                      className={`flex-1 py-1.5 rounded-lg border transition-all text-center ${
+                      className={`flex-1 py-2 rounded-xl border transition-all text-center ${
                         persona === 'bear'
                           ? 'bg-red-500/10 border-red-500/30 text-red-400 shadow-sm'
-                          : 'border-transparent hover:border-zinc-850 text-zinc-500 hover:text-zinc-300'
+                          : 'bg-zinc-900/30 border-zinc-800/50 hover:bg-zinc-900 text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
                       🐻 Bear
@@ -242,10 +279,10 @@ export default function Home() {
                   </div>
 
                   {/* Messages Stream */}
-                  <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+                  <div className="flex-1 overflow-y-auto py-2 flex flex-col gap-4 z-10 relative custom-scrollbar pr-2">
                     {/* Welcome Message */}
-                    <div className="bg-[#141416]/50 border border-[#232326] p-4 rounded-xl text-xs font-light leading-relaxed text-zinc-400">
-                      I have compiled the comprehensive equity research report for **{profile?.name}** on the workspace panel. 
+                    <div className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-2xl text-xs font-light leading-relaxed text-zinc-400 shadow-inner">
+                      I have compiled the comprehensive equity research report for <strong className="text-zinc-200">{profile?.name}</strong> on the workspace panel. 
                       You can ask me follow-up questions about its financial ratios, balance sheet leverage, or growth vectors.
                     </div>
 
@@ -254,13 +291,13 @@ export default function Home() {
                       return (
                         <div
                           key={idx}
-                          className={`flex flex-col max-w-[85%] rounded-2xl p-3 text-xs leading-normal font-light ${
+                          className={`flex flex-col max-w-[90%] rounded-2xl p-3.5 text-xs leading-normal font-light shadow-sm ${
                             isUser
-                              ? 'bg-teal-600/10 border border-teal-500/20 text-white self-end rounded-br-none'
-                              : 'bg-[#141416] border border-[#232326] text-zinc-300 self-start rounded-bl-none'
+                              ? 'bg-gradient-to-br from-teal-600/20 to-teal-900/20 border border-teal-500/20 text-white self-end rounded-br-none'
+                              : 'bg-zinc-900/60 border border-zinc-800/50 text-zinc-300 self-start rounded-bl-none'
                           }`}
                         >
-                          <span className="text-[9px] text-zinc-500 font-bold uppercase mb-1 font-mono">
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase mb-1.5 font-mono tracking-wider">
                             {isUser ? 'You' : 'Agent'}
                           </span>
                           <span className="whitespace-pre-line">{m.content}</span>
@@ -269,15 +306,15 @@ export default function Home() {
                     })}
 
                     {chatLoading && (
-                      <div className="bg-[#141416] border border-[#232326] text-zinc-400 p-3 rounded-2xl rounded-bl-none self-start max-w-[85%] text-xs font-light animate-pulse flex items-center gap-2">
-                        <Activity className="h-4.5 w-4.5 animate-spin text-teal-400" />
+                      <div className="bg-zinc-900/60 border border-zinc-800/50 text-zinc-400 p-3.5 rounded-2xl rounded-bl-none self-start max-w-[90%] text-xs font-light animate-pulse flex items-center gap-3 shadow-sm">
+                        <Activity className="h-4 w-4 animate-spin text-teal-400" />
                         <span>Agent is compiling data...</span>
                       </div>
                     )}
 
                     {chatError && (
-                      <div className="text-red-400 text-[10px] self-center flex items-center gap-1">
-                        <AlertTriangle className="h-3 w-3" />
+                      <div className="text-red-400 text-[11px] self-center flex items-center gap-1.5 bg-red-950/30 px-3 py-1.5 rounded-lg border border-red-900/50">
+                        <AlertTriangle className="h-3.5 w-3.5" />
                         <span>{chatError}</span>
                       </div>
                     )}
@@ -287,14 +324,14 @@ export default function Home() {
 
                   {/* Suggestion Chips */}
                   {messages.length === 0 && (
-                    <div className="px-5 py-2 flex flex-col gap-1.5">
-                      <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider">Suggested Prompts</span>
-                      <div className="flex flex-col gap-1">
+                    <div className="py-2 flex flex-col gap-2 z-10 relative">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider pl-1">Suggested Prompts</span>
+                      <div className="flex flex-col gap-1.5">
                         {chatSuggestions.map((s, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleSuggestionClick(s)}
-                            className="text-left px-3 py-1.5 bg-[#141416] hover:bg-[#1b1b1e] border border-[#232326] text-zinc-400 hover:text-white rounded-lg text-[10px] font-medium transition-all truncate"
+                            className="text-left px-4 py-2.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-zinc-800/50 hover:border-zinc-700/50 text-zinc-400 hover:text-zinc-200 rounded-xl text-[11px] font-medium transition-all truncate shadow-sm"
                           >
                             &gt; {s}
                           </button>
@@ -304,52 +341,77 @@ export default function Home() {
                   )}
 
                   {/* Input Form Box */}
-                  <form onSubmit={handleSendChatMessage} className="p-4 border-t border-[#232326] bg-[#101012] flex gap-2">
+                  <form onSubmit={handleSendChatMessage} className="pt-4 border-t border-zinc-800/80 flex gap-2 z-10 relative">
                     <input
                       type="text"
                       placeholder="Ask follow-up details..."
                       value={inputVal}
                       onChange={(e) => setInputVal(e.target.value)}
                       disabled={chatLoading}
-                      className="flex-1 bg-[#09090b] border border-[#232326] focus:border-teal-500 rounded-lg text-xs px-3 py-2.5 outline-none text-white font-light"
+                      className="flex-1 bg-zinc-900/50 border border-zinc-800/80 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 rounded-xl text-xs px-4 py-3 outline-none text-white font-light transition-all shadow-inner"
                     />
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={chatLoading || !inputVal.trim()}
-                      className="px-3 bg-teal-600 hover:bg-teal-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg transition-all"
+                      className="px-4 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 text-white rounded-xl transition-all shadow-lg"
                     >
-                      <Send className="h-3.5 w-3.5" />
-                    </button>
+                      <Send className="h-4 w-4" />
+                    </motion.button>
                   </form>
-                </div>
-              )}
-            </div>
 
-            {/* RIGHT PANEL: Live Research Output Artifact Dashboard */}
-            <div className="flex-1 overflow-y-auto h-full bg-[#09090b]">
-              {report && profile && financials && metrics ? (
-                <ReportDetails
-                  report={report}
-                  profile={profile}
-                  financials={financials}
-                  metrics={metrics}
-                  priceHistory={priceHistory}
-                />
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-zinc-500 gap-4">
-                  <div className="flex items-center justify-center w-12 h-12 bg-[#141416] border border-[#232326] rounded-xl shadow-lg animate-pulse">
-                    <Sparkles className="h-6 w-6 text-teal-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-white text-sm">Gearing up the Investment War Room</h3>
-                    <p className="text-xs text-zinc-500 font-light mt-1">Right-hand interactive financial terminal will render details upon pipeline compile.</p>
-                  </div>
-                </div>
+                  <style jsx>{`
+                    .custom-scrollbar::-webkit-scrollbar {
+                      width: 4px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                      background: transparent;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                      background: rgba(255, 255, 255, 0.1);
+                      border-radius: 4px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                      background: rgba(255, 255, 255, 0.2);
+                    }
+                  `}</style>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
+          </motion.div>
 
-          </div>
-        )}
+              {/* RIGHT (40%) - Report Preview */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="w-full lg:w-[40%] h-full shrink-0"
+              >
+                <AnimatePresence mode="wait">
+                  {report && profile && financials && metrics ? (
+                    <motion.div key="report" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease: "easeOut" }} className="w-full h-full bg-[linear-gradient(180deg,rgba(24,24,27,.9),rgba(14,14,16,.95))] border border-zinc-800 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.4)] glass-reflection">
+                      <div className="w-full h-full overflow-y-auto">
+                        <ReportDetails
+                          report={report}
+                          profile={profile}
+                          financials={financials}
+                          metrics={metrics}
+                          priceHistory={priceHistory}
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+                      <ReportSkeleton progressLog={progressLog} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* FOOTER (Only shown on search landing page to keep workspace full height) */}
