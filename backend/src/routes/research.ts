@@ -65,8 +65,8 @@ router.get('/research', async (req, res) => {
 
       // Metrics must have at least some non-null values
       const metrics = finalState.metrics;
-      const hasSomeMetrics = metrics.peRatio || metrics.currentPrice || metrics.marketCap ||
-                             metrics.roe || metrics.beta;
+      const hasSomeMetrics = metrics.peRatio || metrics.currentPrice ||
+                             metrics.roe || metrics.beta || metrics.evToEbitda;
       if (!hasSomeMetrics) {
         sanityErrors.push('Key valuation metrics are all null');
       }
