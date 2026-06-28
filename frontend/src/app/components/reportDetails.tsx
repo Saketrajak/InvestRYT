@@ -495,8 +495,8 @@ export default function ReportDetails({
 
       {/* Removed the Follow-up bar as per user request to keep input INSIDE the center panel only */}
 
-      {/* Hidden PDF template */}
-      <div className="absolute top-0 left-0 w-0 h-0 overflow-hidden opacity-0 pointer-events-none -z-50">
+      {/* Hidden PDF template — off-screen but full-size so html2canvas can capture it */}
+      <div className="fixed -left-[9999px] top-0 opacity-0 pointer-events-none -z-50" aria-hidden="true">
         <PDFReportTemplate report={report} profile={profile} financials={financials} metrics={metrics} priceHistory={priceHistory} />
       </div>
 
