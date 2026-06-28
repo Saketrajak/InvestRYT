@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { graph } from '../agent/graph.js';
 import type { SSEEvent } from '../types/index.js';
-import { getGeminiModel } from '../services/aiService.js';
+import { invokeGemini } from '../services/aiService.js';
 import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
 import { detectMarket, toYahooSymbol } from '../utils/marketDetector.js';
 import * as yahooService from '../services/yahooService.js';
@@ -50,15 +50,47 @@ router.get('/research', async (req, res) => {
         message: finalState.error,
       });
     } else if (finalState.report && finalState.profile && finalState.financials && finalState.metrics) {
-      // Completed successfully
-      sendEvent({
-        type: 'complete',
-        report: finalState.report,
-        profile: finalState.profile,
-        financials: finalState.financials,
-        metrics: finalState.metrics,
-        priceHistory: finalState.priceHistory || [],
-      });
+      // ---- Data sanity checks before sending to frontend ----
+      const sanityErrors: string[] = [];
+
+      // Profile must have a company name
+      if (!finalState.profile.name?.trim()) {
+        sanityErrors.push('Profile missing company name');
+      }
+
+      // Financial data must have at least one income statement
+      if (!finalState.financials.incomeStatements?.length) {
+        sanityErrors.push('No income statements available');
+      }
+
+      // Metrics must have at least some non-null values
+      const metrics = finalState.metrics;
+      const hasSomeMetrics = metrics.peRatio || metrics.currentPrice || metrics.marketCap ||
+                             metrics.roe || metrics.beta;
+      if (!hasSomeMetrics) {
+        sanityErrors.push('Key valuation metrics are all null');
+      }
+
+      // Report must have a valid verdict
+      if (!['INVEST', 'PASS', 'HOLD'].includes(finalState.report.verdict)) {
+        sanityErrors.push(`Report has invalid verdict: "${finalState.report.verdict}"`);
+      }
+
+      if (sanityErrors.length > 0) {
+        const errorMsg = `Data integrity check failed: ${sanityErrors.join('; ')}`;
+        console.error(`[ResearchRoute] ${errorMsg}`);
+        sendEvent({ type: 'error', message: errorMsg });
+      } else {
+        // All checks passed — send complete event
+        sendEvent({
+          type: 'complete',
+          report: finalState.report,
+          profile: finalState.profile,
+          financials: finalState.financials,
+          metrics: finalState.metrics,
+          priceHistory: finalState.priceHistory || [],
+        });
+      }
     } else {
       sendEvent({
         type: 'error',
@@ -140,9 +172,8 @@ ${personaInstruction}`;
     // Add the new message
     messagesList.push(new HumanMessage(message));
 
-    // 3. Call model
-    const model = getGeminiModel({ temperature: 0.3 });
-    const response = await model.invoke(messagesList);
+    // 3. Call model (with auto key rotation on rate-limit errors)
+    const response = await invokeGemini(messagesList, { temperature: 0.3 });
 
     const reply = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
 

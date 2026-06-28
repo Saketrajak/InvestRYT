@@ -73,7 +73,7 @@ export async function getCompanyProfile(symbol: string): Promise<CompanyProfile 
       industry: sp.industry || '',
       description: sp.longBusinessSummary || '',
       marketCap: quote.marketCap || null,
-      currency: quote.currency || 'INR',
+      currency: quote.currency || 'USD', // Default to USD (safer fallback than INR for global coverage)
       country: sp.country || '',
       website: sp.website || '',
       employees: sp.fullTimeEmployees || null,

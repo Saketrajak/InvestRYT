@@ -197,14 +197,14 @@ export async function getKeyMetrics(ticker: string): Promise<KeyMetrics | null> 
     roa: ratios.returnOnAssetsTTM || null,
     debtToEquity: ratios.debtEquityRatioTTM || null,
     currentRatio: ratios.currentRatioTTM || null,
-    dividendYield: ratios.dividendYielTTM || quote.dividendYield || null,
+    dividendYield: ratios.dividendYieldTTM || quote.dividendYield || null,
     evToEbitda: ratios.enterpriseValueOverEBITDATTM || null,
     priceToSales: ratios.priceToSalesRatioTTM || null,
     beta: quote.beta || null,
     fiftyTwoWeekHigh: quote.yearHigh || null,
     fiftyTwoWeekLow: quote.yearLow || null,
     currentPrice: quote.price || null,
-    targetPrice: quote.priceAvg200 || null, // rough proxy
+    targetPrice: null, // FMP quote endpoint doesn't provide analyst targets; Yahoo fallback fills this
   };
 
   cache.set(cacheKey, metrics, 30); // Cache for 30 min (price-sensitive)

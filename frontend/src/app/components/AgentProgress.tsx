@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { AgentStep, StepStatus } from '../../types/index.js';
-import { ProgressLogEntry } from '../hooks/useResearchAgent';
+import type { ProgressLogEntry } from '../hooks/useResearchAgent';
 import { Loader2, Check, AlertCircle, Play, Terminal } from 'lucide-react';
 
 interface AgentProgressProps {

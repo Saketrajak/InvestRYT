@@ -118,12 +118,43 @@ Conduct a deep dive quantitative and qualitative assessment:
 3. **Valuation**: Compare current P/E, P/B, EV/EBITDA ratios relative to history, growth rates, and peers. Is it undervalued, fairly valued, or overvalued? Estimate a fair value price range.
 4. **Catalysts**: Identify 3-4 specific growth catalysts (secular tailwinds, new products, margin expansions).
 5. **Risk Factors**: Identify 3-4 risk factors (macro, regulatory, competition, balance sheet) and rate each as HIGH, MEDIUM, or LOW severity.
-6. **Final Verdict**: Decide to INVEST, PASS, or HOLD. Be decisive. Explain the critical factors that drove your decision in a premium investment thesis.
+6. **Final Verdict**: Decide INVEST, PASS, or HOLD. Be decisive. Explain the critical factors that drove your decision in a premium investment thesis.
+
+You MUST output valid JSON with this exact schema:
+{
+  "analysisText": "Your full analysis with all sections as plain text (no markdown)",
+  "verdict": "INVEST or PASS or HOLD",
+  "confidenceScore": number between 0 and 100
+}
+
+CRITICAL: The "verdict" field must be exactly one of: "INVEST", "PASS", "HOLD". Do not use any other value.
+CRITICAL: The "confidenceScore" must be a number between 0 and 100.
+CRITICAL: Do not wrap the JSON in markdown code blocks. Return ONLY the raw JSON object.
 `;
 
 export const REPORT_GENERATION_PROMPT = `
 You are a financial publishing expert. Convert the previous investment research analysis of {companyName} ({ticker}) into a structured JSON report.
 Make sure the tone is highly professional, authoritative, and analytical. Do not use placeholders. Write comprehensive text for each section.
+
+CRITICAL — Factual Accuracy Rules:
+1. The "analysisText" above may contain the AI analyst's interpretation. Cross-reference every claim about revenue, margins, growth rates, and valuation multiples against the RAW DATA provided below.
+2. NEVER fabricate or alter actual financial numbers. If the raw data shows Revenue = $100B, do not write $120B.
+3. confidenceScore must ALWAYS be between 0 and 100 and should reflect the actual data quality and strength, not just the AI's opinion.
+4. fairValueEstimate should reference the actual current price ({currentPrice}) and target price ({targetPrice}) from the raw data.
+5. financialAnalysis fields (revenueAnalysis, profitabilityAnalysis, etc.) must reference ACTUAL figures from the raw data below.
+
+RAW DATA FOR CROSS-REFERENCING:
+- Sector: {sector} | Industry: {industry}
+- Current Price: {currentPrice} | Target Price: {targetPrice}
+- P/E: {peRatio} | Forward P/E: {forwardPE} | P/B: {pbRatio} | PEG: {pegRatio}
+- ROE: {roe}% | ROA: {roa}% | Debt/Equity: {debtToEquity} | Current Ratio: {currentRatio}
+- EV/EBITDA: {evToEbitda} | Price/Sales: {priceToSales} | Beta: {beta}
+- 52W Range: {fiftyTwoWeekLow} - {fiftyTwoWeekHigh}
+- Dividend Yield: {dividendYield}%
+- Market Cap: {marketCap} | Currency: {currency}
+- Revenue (latest year): {latestRevenue}
+- Net Income (latest year): {latestNetIncome}
+- Free Cash Flow (latest year): {latestFreeCashFlow}
 
 The output JSON must strictly match this TypeScript interface:
 

@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input"
 
 interface SearchHeroProps {
   onSearch: (query: string) => void;
-  loading: boolean;
 }
 
 const companies = [
@@ -57,12 +56,12 @@ const marqueeImages = [
   "/4.png?v=2", "/1.png?v=2", "/6.png?v=2", "/2.png?v=2", "/5.png?v=2",
 ];
 
-export default function SearchHero({ onSearch, loading }: SearchHeroProps) {
+export default function SearchHero({ onSearch }: SearchHeroProps) {
   const [query, setQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim() && !loading) {
+    if (query.trim()) {
       onSearch(query.trim());
     }
   };
@@ -123,12 +122,11 @@ export default function SearchHero({ onSearch, loading }: SearchHeroProps) {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search company name, ticker or code (e.g., Apple, RELIANCE.NS, Samsung)"
                   className="flex-1 border-none bg-transparent h-12 text-base text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-0 shadow-none"
-                  disabled={loading}
                 />
                 <Button
                   variant="outline"
                   type="submit"
-                  disabled={loading || !query.trim()}
+                  disabled={!query.trim()}
                   className="h-10 px-6 rounded-lg bg-purple-600/10 hover:bg-purple-600/20 border-purple-500/30 text-purple-400 font-semibold uppercase tracking-wider transition-all disabled:opacity-50 ml-1"
                 >
                   Research
@@ -144,7 +142,7 @@ export default function SearchHero({ onSearch, loading }: SearchHeroProps) {
               {suggestions.map((item, index) => (
                 <React.Fragment key={item.query}>
                   <button
-                    onClick={() => !loading && onSearch(item.query)}
+                    onClick={() => onSearch(item.query)}
                     className="hover:text-white transition-colors"
                   >
                     {item.label}

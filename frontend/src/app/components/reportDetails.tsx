@@ -1,10 +1,7 @@
 "use client";
 
-// ============================================================
-// Investryt AI — Premium Report Dashboard & PDF Export
-// ============================================================
-
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type {
   ResearchReport,
   CompanyProfile,
@@ -20,28 +17,17 @@ import {
 } from './charts';
 import DcfSimulator from './DcfSimulator';
 import PeerComparison from './PeerComparison';
+import PDFReportTemplate from './PDFReportTemplate';
 import {
-  Download,
-  ExternalLink,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-  FileText,
-  DollarSign,
-  Briefcase,
-  Layers,
-  Activity,
-  Globe,
-  Users,
-  Compass,
-  LayoutDashboard,
-  Percent,
-  Table,
-  BarChart4,
-  Newspaper,
+  Download, ExternalLink, Activity, Briefcase, Globe,
+  LayoutDashboard, Table, BarChart4, Newspaper, ChevronRight,
+  TrendingUp, TrendingDown, Target, Building2, MapPin, Users, CheckCircle, Percent,
+  Send, Sparkles, Scale, Anchor, Lightbulb, ShieldAlert
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ReportDetailsProps {
   report: ResearchReport;
@@ -51,7 +37,7 @@ interface ReportDetailsProps {
   priceHistory: StockPriceEntry[];
 }
 
-type TabType = 'summary' | 'dcf' | 'excel' | 'peers' | 'news';
+type TabType = 'summary' | 'financials' | 'valuation' | 'peers' | 'news';
 
 export default function ReportDetails({
   report,
@@ -60,7 +46,6 @@ export default function ReportDetails({
   metrics,
   priceHistory,
 }: ReportDetailsProps) {
-  const reportRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [exporting, setExporting] = useState(false);
 
@@ -70,7 +55,6 @@ export default function ReportDetails({
     const abs = Math.abs(val);
     const sign = val < 0 ? '-' : '';
     const sym = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency + ' ';
-
     if (currency === 'INR') {
       if (abs >= 1e7) return `${sign}${sym}${(abs / 1e7).toFixed(2)} Cr`;
       if (abs >= 1e5) return `${sign}${sym}${(abs / 1e5).toFixed(2)} L`;
@@ -94,42 +78,31 @@ export default function ReportDetails({
     return val.toLocaleString();
   };
 
-  // PDF Export logic
+  // Premium High-Res PDF Export logic
   const handlePdfExport = async () => {
-    if (!reportRef.current) return;
     setExporting(true);
-    
-    // Tiny delay to ensure React renders all stacked sections for print
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
     try {
-      const element = reportRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#09090b',
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // A4 Width
-      const pageHeight = 295; // A4 Height
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const container = document.getElementById('pdf-export-container');
+      if (!container) throw new Error("Template missing");
+      const pages = container.querySelectorAll('[id^="pdf-page-"]');
+      for (let i = 0; i < pages.length; i++) {
+        const pageEl = pages[i] as HTMLElement;
+        const canvas = await html2canvas(pageEl, {
+          scale: 3,
+          useCORS: true,
+          backgroundColor: '#09090b',
+          logging: false,
+          width: 1000,
+          height: 1414,
+          windowWidth: 1000,
+        });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
       }
-
-      pdf.save(`${report.ticker.toUpperCase()}_Equity_Research_Report.pdf`);
+      pdf.save(`${report.ticker.toUpperCase()}_Institutional_Research.pdf`);
     } catch (err) {
       console.error('[PDF Export] Failed:', err);
     } finally {
@@ -137,483 +110,396 @@ export default function ReportDetails({
     }
   };
 
-  // Calculations for Margin Charts
-  const years = financials.incomeStatements.map((item) => item.date.slice(0, 4)).reverse();
-  const revenues = financials.incomeStatements.map((item) => item.revenue).reverse();
-  const ebitdas = financials.incomeStatements.map((item) => item.ebitda).reverse();
-
-  const grossMargins = financials.incomeStatements.map((item) => item.grossProfitRatio * 100).reverse();
-  const ebitdaMargins = financials.incomeStatements.map((item) => (item.ebitda / (item.revenue || 1)) * 100).reverse();
-  const netMargins = financials.incomeStatements.map((item) => item.netIncomeRatio * 100).reverse();
-
-  // Verdict designs
+  // Verdict configs
   const verdictConfig = {
-    INVEST: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-400', dot: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' },
-    PASS: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', dot: 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]' },
-    HOLD: { bg: 'bg-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-400', dot: 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]' },
+    INVEST: { glow: 'shadow-[0_0_80px_rgba(52,211,153,0.3)]', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+    PASS: { glow: 'shadow-[0_0_80px_rgba(248,113,113,0.3)]', text: 'text-red-400', border: 'border-red-500/30' },
+    HOLD: { glow: 'shadow-[0_0_80px_rgba(251,191,36,0.3)]', text: 'text-amber-400', border: 'border-amber-500/30' },
+    WATCHLIST: { glow: 'shadow-[0_0_80px_rgba(56,189,248,0.3)]', text: 'text-sky-400', border: 'border-sky-500/30' },
   };
-
-  const currentVerdict = report.verdict.toUpperCase() as 'INVEST' | 'PASS' | 'HOLD';
+  const currentVerdict = report.verdict.toUpperCase() as keyof typeof verdictConfig;
   const vd = verdictConfig[currentVerdict] || verdictConfig.HOLD;
 
-  // Retrieve latest FCF, Cash, and Debt for DCF Modeler
-  const latestFcf = financials.cashFlows[0]?.freeCashFlow || 0;
-  const latestCash = financials.balanceSheets[0]?.cashAndEquivalents || 0;
-  const latestDebt = financials.balanceSheets[0]?.totalDebt || 0;
-
-  // Render Tabs
   const navTabs: { id: TabType; label: string; icon: any }[] = [
-    { id: 'summary', label: 'Executive Summary', icon: LayoutDashboard },
-    { id: 'dcf', label: 'Valuation Modeler', icon: Percent },
-    { id: 'excel', label: 'Excel Statements', icon: Table },
-    { id: 'peers', label: 'Peer Multiples', icon: BarChart4 },
-    { id: 'news', label: 'News & Sentiments', icon: Newspaper },
+    { id: 'summary', label: 'Summary', icon: LayoutDashboard },
+    { id: 'financials', label: 'Financials', icon: Activity },
+    { id: 'valuation', label: 'Valuation', icon: Percent },
+    { id: 'peers', label: 'Peers', icon: BarChart4 },
+    { id: 'news', label: 'News', icon: Newspaper },
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 flex flex-col gap-6">
-      {/* Tab Controls (Hidden during PDF export) */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-zinc-800/80 pb-4 gap-4">
-        <div className="flex flex-wrap gap-1 bg-zinc-900/40 backdrop-blur-sm shadow-sm p-1.5 rounded-xl border border-zinc-800/80">
+    <div className="w-full h-full min-w-0 bg-[#09090b] text-zinc-300 flex flex-col relative overflow-y-auto overflow-x-hidden pr-[420px]">
+      
+      {/* 1. HEADER & HERO RECOMMENDATION */}
+      <div className="px-8 py-6 flex flex-col gap-6 relative min-w-0">
+        <div className={`absolute top-0 right-0 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] rounded-full blur-[100px] opacity-20 pointer-events-none ${vd.glow}`} />
+        
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 z-10 min-w-0">
+          <div className="flex flex-col gap-4 w-full lg:max-w-2xl min-w-0">
+            <div className="flex items-center gap-3 flex-wrap min-w-0">
+              <span className="px-3 py-1 rounded-full bg-[rgba(255,255,255,.03)] border border-[rgba(255,255,255,.06)] text-[10px] font-bold text-zinc-400 uppercase tracking-widest backdrop-blur-md">
+                {profile.exchange}:{profile.ticker}
+              </span>
+              <span className="text-xs font-medium text-zinc-600 uppercase tracking-wider truncate">{profile.sector} &middot; {profile.industry}</span>
+            </div>
+            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-black text-white tracking-tighter leading-none">
+              {profile.name}
+            </h1>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500 font-medium">
+              <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {profile.country}</span>
+              <span className="flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Market Cap: {formatCurrency(profile.marketCap, profile.currency)}</span>
+              <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Employees: {formatNumber(profile.employees)}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePdfExport}
+            disabled={exporting}
+            className="group relative flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 hover:from-cyan-400 hover:to-purple-500 text-white rounded-full text-xs font-bold transition-all shadow-[0_10px_30px_rgba(34,211,238,0.1)] hover:shadow-[0_10px_40px_rgba(168,85,247,0.3)] border border-[rgba(255,255,255,.1)] hover:border-transparent backdrop-blur-xl overflow-hidden disabled:opacity-50 shrink-0"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+            {exporting ? (
+              <Activity className="h-4 w-4 animate-spin text-white" />
+            ) : (
+              <Download className="h-4 w-4 text-cyan-400 group-hover:text-white transition-colors" />
+            )}
+            <span className="text-[10px] uppercase tracking-widest">
+              {exporting ? 'Compiling PDF...' : 'Download PDF'}
+            </span>
+          </button>
+        </div>
+
+        {/* HERO RECOMMENDATION CARD */}
+        <div className="w-full bg-[rgba(18,18,20,.68)] backdrop-blur-2xl border border-[rgba(255,255,255,.06)] rounded-2xl p-6 gap-6 flex flex-col lg:flex-row flex-wrap items-start justify-between shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-10 relative min-w-0">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-500 via-purple-500 to-emerald-500 opacity-40 rounded-t-2xl" />
+          
+          <div className="flex flex-col gap-3 flex-1 min-w-[220px]">
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">AI Investment Decision</span>
+            <div className="flex items-center gap-4 min-w-0">
+              <span className={`text-3xl lg:text-4xl xl:text-5xl font-black uppercase tracking-tighter ${vd.text}`}>{report.verdict}</span>
+            </div>
+            <p className="text-zinc-500 text-xs font-medium leading-relaxed">
+              Based on {report.confidenceScore}% confidence interval across financial modeling, sentiment analysis, and moat evaluation.
+            </p>
+          </div>
+
+          <div className="w-px h-24 bg-[rgba(255,255,255,.05)] hidden xl:block shrink-0" />
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-[2] min-w-[280px]">
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold truncate">Current Price</span>
+              <span className="text-xl lg:text-2xl font-bold text-white truncate">{formatCurrency(metrics.currentPrice, profile.currency)}</span>
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold truncate">Target Price</span>
+              <span className="text-xl lg:text-2xl font-bold text-cyan-400 truncate">{formatCurrency(metrics.targetPrice, profile.currency)}</span>
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold truncate">Fair Value Est.</span>
+              <span className="text-sm lg:text-base font-bold text-zinc-300 leading-tight truncate">{report.fairValueEstimate || 'N/A'}</span>
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold truncate">Expected Upside</span>
+              <span className={`text-xl lg:text-2xl font-black truncate ${((metrics.targetPrice || 0) > (metrics.currentPrice || 0)) ? 'text-emerald-400' : 'text-red-400'}`}>
+                {metrics.targetPrice && metrics.currentPrice 
+                  ? formatPercentage((metrics.targetPrice - metrics.currentPrice) / metrics.currentPrice) 
+                  : 'N/A'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. STICKY TAB BAR */}
+      <div className="sticky top-0 z-40 px-8 py-3 bg-[#09090b]/90 backdrop-blur-xl border-b border-[rgba(255,255,255,.04)] shadow-[0_10px_40px_rgba(0,0,0,0.5)] min-w-0 w-full">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar min-w-0 w-full">
           {navTabs.map((tab) => {
-            const Icon = tab.icon;
             const active = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
-              <button
+              <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`relative px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wider flex justify-center items-center gap-2.5 whitespace-nowrap transition-all duration-300 ${
                   active
-                    ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                    ? 'text-white shadow-[0_0_20px_rgba(34,211,238,0.15)]'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-[rgba(255,255,255,.04)]'
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
+                <Icon className={`h-4.5 w-4.5 transition-colors duration-300 ${active ? 'text-cyan-400' : ''}`} />
+                <span className="relative z-10">{tab.label}</span>
+                {active && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-[rgba(255,255,255,.06)] rounded-xl border border-[rgba(255,255,255,.1)] shadow-[0_0_30px_rgba(34,211,238,0.1)]"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                {active && (
+                  <motion.div
+                    layoutId="activeTabUnderline"
+                    className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-cyan-400 via-cyan-500 to-purple-500 rounded-full"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </motion.button>
             );
           })}
         </div>
-
-        <button
-          onClick={handlePdfExport}
-          disabled={exporting}
-          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/40 backdrop-blur-sm shadow-sm hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white rounded-xl font-medium transition-all text-xs uppercase tracking-wider"
-        >
-          <Download className={`h-4 w-4 ${exporting ? 'animate-spin' : ''}`} />
-          {exporting ? 'Printing PDF...' : 'Download Full PDF Report'}
-        </button>
       </div>
 
-      {/* Main Printable Dashboard Container */}
-      <div
-        ref={reportRef}
-        id="report-container"
-        className="w-full bg-transparent text-[#f4f4f5] border-none rounded-2xl overflow-hidden p-6 md:p-8 flex flex-col gap-8 shadow-none"
-      >
-        {/* SECTION 1: Report Title Header Panel (Always Visible) */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800/80 pb-6 gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2 flex-wrap">
-              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">{profile.name}</h1>
-              <span className="px-3 py-1 bg-zinc-800 text-zinc-300 border border-zinc-700 text-sm font-semibold rounded-md uppercase tracking-wider">
-                {profile.ticker}:{profile.exchange}
-              </span>
-            </div>
-            <div className="flex gap-4 text-sm text-zinc-400 font-medium">
-              <span className="flex items-center gap-1">
-                <Compass className="h-4 w-4 text-teal-500/80" /> {profile.sector}
-              </span>
-              <span>•</span>
-              <span>{profile.industry}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${vd.bg} ${vd.border} ${vd.text}`}>
-              <span className={`h-2.5 w-2.5 rounded-full ${vd.dot}`} />
-              <span className="font-bold tracking-wider text-sm">VERDICT: {report.verdict}</span>
-            </div>
-
-            <div className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 px-4 py-1.5 rounded-xl text-center">
-              <div className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Confidence</div>
-              <div className="text-lg font-bold text-amber-500">{report.confidenceScore}%</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ============================================================ */}
-        {/* TAB 1: EXECUTIVE SUMMARY                                     */}
-        {/* ============================================================ */}
-        {(activeTab === 'summary' || exporting) && (
-          <div className="flex flex-col gap-8">
-            {/* Key Metrics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {[
-                { label: 'Current Price', val: formatCurrency(metrics.currentPrice, profile.currency), icon: DollarSign, color: 'text-teal-400' },
-                { label: 'Fair Value Est', val: report.fairValueEstimate.split(/[\s,]+/)[0] || 'N/A', icon: TrendingUp, color: 'text-amber-500' },
-                { label: 'Market Cap', val: formatCurrency(profile.marketCap, profile.currency), icon: Briefcase, color: 'text-blue-400' },
-                { label: 'P/E Ratio (TTM)', val: metrics.peRatio?.toFixed(1) || 'N/A', icon: Layers, color: 'text-indigo-400' },
-                { label: 'ROE (TTM)', val: formatPercentage(metrics.roe), icon: Activity, color: 'text-purple-400' },
-                { label: 'Dividend Yield', val: formatPercentage(metrics.dividendYield), icon: Globe, color: 'text-emerald-400' },
-              ].map((item, idx) => (
-                <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between h-24">
-                  <div className="flex justify-between items-center text-xs text-zinc-500 font-bold uppercase tracking-wider">
-                    <span>{item.label}</span>
-                    <item.icon className={`h-4 w-4 ${item.color}`} />
-                  </div>
-                  <div className="text-lg font-bold text-white mt-1 truncate">{item.val}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Core Narrative thesis */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-4">
-              <div className="lg:col-span-8 flex flex-col gap-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-emerald-500" />
-                  Investment Thesis
-                </h2>
-                <p className="text-zinc-300 leading-relaxed font-light text-sm whitespace-pre-line">
-                  {report.investmentThesis}
-                </p>
-              </div>
-
-              <div className="lg:col-span-4 bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-5 rounded-xl flex flex-col gap-4">
-                <h3 className="text-md font-bold text-white flex items-center gap-2">
-                  <Users className="h-5 w-5 text-teal-500" />
-                  Corporate Details
-                </h3>
-                <div className="flex flex-col gap-3 text-sm">
-                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
-                    <span className="text-zinc-500 font-medium">Headquarters</span>
-                    <span className="text-zinc-300 font-semibold">{profile.country || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
-                    <span className="text-zinc-500 font-medium">Employees</span>
-                    <span className="text-zinc-300 font-semibold">{formatNumber(profile.employees)}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-zinc-800/80 pb-2">
-                    <span className="text-zinc-500 font-medium">Currency</span>
-                    <span className="text-zinc-300 font-semibold uppercase">{profile.currency}</span>
-                  </div>
-                  <div className="flex justify-between pb-1">
-                    <span className="text-zinc-500 font-medium">Website</span>
-                    {profile.website ? (
-                      <a
-                        href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-teal-400 font-semibold hover:underline flex items-center gap-1"
-                      >
-                        Visit <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="text-zinc-300 font-semibold">N/A</span>
-                    )}
+      {/* 3. TAB CONTENT */}
+      <div className="px-8 py-6 flex-1">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full flex flex-col gap-8 min-w-0 bg-[rgba(18,18,20,.68)] backdrop-blur-2xl border border-[rgba(255,255,255,.06)] rounded-2xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          >
+            
+            {/* -------------------------------------------------------- */}
+            {/* EXECUTIVE SUMMARY                                        */}
+            {/* -------------------------------------------------------- */}
+            {activeTab === 'summary' && (
+              <>
+                <div className="flex flex-col gap-4 w-full min-w-0">
+                  <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5" /> AI Investment Thesis
+                  </h2>
+                  <div className="prose prose-invert max-w-none text-base lg:text-lg text-zinc-300 leading-[1.7] font-light [&_h1]:text-white [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-3 [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:text-cyan-400 [&_h3]:text-base [&_h3]:font-bold [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-4 [&_li]:mb-1 [&_strong]:text-white [&_strong]:font-semibold [&_code]:bg-zinc-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:text-cyan-300">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{report.investmentThesis}</ReactMarkdown>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-zinc-500 italic leading-relaxed">
-                  {report.companyOverview}
-                </div>
-              </div>
-            </div>
 
-            {/* Overview Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <RevenueChart years={years} revenues={revenues} ebitdas={ebitdas} currency={profile.currency} />
-              {priceHistory.length > 0 ? (
-                <StockPriceChart prices={priceHistory} ticker={profile.ticker} currency={profile.currency} />
-              ) : (
-                <div className="w-full h-80 bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 rounded-xl flex items-center justify-center text-zinc-500">
-                  Stock Price History Unavailable
-                </div>
-              )}
-            </div>
-
-            {/* Radar Factors + Margin Lines */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <RadarChart metrics={metrics as any} verdict={report.verdict} />
-              <MarginTrendChart years={years} grossMargins={grossMargins} ebitdaMargins={ebitdaMargins} netMargins={netMargins} />
-            </div>
-
-            {/* Narratives breakdown */}
-            <div className="flex flex-col gap-6">
-              <h2 className="text-lg font-bold text-white border-b border-zinc-800/80 pb-3 uppercase tracking-wider">Institutional Financial Analysis</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  { title: 'Revenue & Growth Engine', content: report.financialAnalysis.revenueAnalysis },
-                  { title: 'Profitability & Margin Architecture', content: report.financialAnalysis.profitabilityAnalysis },
-                  { title: 'Valuation & Multiples Assessment', content: report.financialAnalysis.valuationAnalysis },
-                  { title: 'Balance Sheet, Leverage & Credit', content: report.financialAnalysis.debtAnalysis },
-                ].map((section, idx) => (
-                  <div key={idx} className="bg-zinc-900/20 border border-zinc-800/80 p-5 rounded-xl flex flex-col gap-2">
-                    <h3 className="text-sm font-bold text-teal-400 uppercase tracking-wider">{section.title}</h3>
-                    <p className="text-zinc-300 text-xs leading-relaxed whitespace-pre-line font-light">
-                      {section.content}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Moat & Competitiveness Card + Growth Catalysts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-zinc-800/80 pt-8">
-              <div className="flex flex-col gap-4">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-teal-400" />
-                  Economic Moat & Competitiveness
-                </h2>
-                <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line font-light">
-                  {report.moatAnalysis}
-                </p>
-                <div className="bg-zinc-900/40 backdrop-blur-sm shadow-sm p-4 rounded-xl border border-zinc-800/80 text-sm text-zinc-300">
-                  <strong className="text-white">Competitive Position Summary:</strong>
-                  <div className="mt-2 text-xs text-zinc-400 leading-relaxed font-light">
-                    {report.competitiveLandscape}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-amber-500" />
-                  Growth Catalysts
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {report.growthCatalysts.map((catalyst, idx) => (
-                    <div key={idx} className="flex gap-3 items-start bg-zinc-900/60 p-3 rounded-lg border border-zinc-800/80">
-                      <span className="h-5 w-5 bg-teal-500/10 text-teal-400 text-xs font-bold rounded-full flex items-center justify-center shrink-0 border border-teal-500/20 mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <span className="text-zinc-300 text-sm font-medium leading-normal">{catalyst}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Risks Panel */}
-            <div className="flex flex-col gap-4 border-t border-zinc-800/80 pt-8">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                Key Risk Factors & Severities
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {report.riskFactors.map((r, idx) => {
-                  const badgeColors = {
-                    HIGH: 'bg-red-500/10 text-red-400 border-red-500/20',
-                    MEDIUM: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                    LOW: 'bg-green-500/10 text-green-400 border-green-500/20',
-                  };
-                  const bc = badgeColors[r.severity.toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW'] || badgeColors.MEDIUM;
-
-                  return (
-                    <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between gap-3">
-                      <p className="text-zinc-300 text-xs leading-relaxed font-light">{r.risk}</p>
-                      <span className={`self-start px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${bc}`}>
-                        {r.severity} Severity
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ============================================================ */}
-        {/* TAB 2: INTERACTIVE DCF SIMULATOR                             */}
-        {/* ============================================================ */}
-        {(activeTab === 'dcf' || exporting) && (
-          <div className="flex flex-col gap-4">
-            {exporting && <h2 className="text-xl font-bold text-white border-b border-zinc-800/80 pb-2 mt-8 uppercase tracking-wider">DCF Intrinsic Valuation Simulator</h2>}
-            <DcfSimulator
-              initialFcf={latestFcf}
-              cash={latestCash}
-              debt={latestDebt}
-              marketCap={profile.marketCap || 0}
-              currentPrice={metrics.currentPrice || 0}
-              currency={profile.currency}
-              market={profile.ticker.toUpperCase().endsWith('.NS') || profile.ticker.toUpperCase().endsWith('.BO') || profile.currency === 'INR' ? 'INDIA' : 'US'}
-            />
-          </div>
-        )}
-
-        {/* ============================================================ */}
-        {/* TAB 3: FINANCIAL EXCEL TABLE                                 */}
-        {/* ============================================================ */}
-        {(activeTab === 'excel' || exporting) && (
-          <div className="flex flex-col gap-4">
-            {exporting && <h2 className="text-xl font-bold text-white border-b border-zinc-800/80 pb-2 mt-8 uppercase tracking-wider">Historical financial statements</h2>}
-            <div className="w-full overflow-x-auto rounded-xl border border-zinc-800/80 shadow-sm">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-zinc-900/60 border-b border-zinc-800/80">
-                    <th className="p-3 text-zinc-400 font-bold uppercase tracking-wider min-w-[180px]">Metric ({profile.currency})</th>
-                    {financials.incomeStatements.map((item) => (
-                      <th key={item.date} className="p-3 text-zinc-300 font-bold uppercase tracking-wider text-right">
-                        {item.date.slice(0, 4)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800/80 bg-zinc-900/20 backdrop-blur-sm">
-                  {/* Income Statement */}
-                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-teal-400" colSpan={financials.incomeStatements.length + 1}>INCOME STATEMENT</td></tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Revenue</td>
-                    {financials.incomeStatements.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-white font-semibold">{formatCurrency(item.revenue, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Gross Profit</td>
-                    {financials.incomeStatements.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.grossProfit, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">EBITDA</td>
-                    {financials.incomeStatements.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300 font-semibold">{formatCurrency(item.ebitda, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Operating Income</td>
-                    {financials.incomeStatements.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.operatingIncome, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr className="border-b border-zinc-800/80">
-                    <td className="p-3 text-zinc-400 font-medium">Net Income</td>
-                    {financials.incomeStatements.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-teal-400 font-bold">{formatCurrency(item.netIncome, profile.currency)}</td>
-                    ))}
-                  </tr>
-
-                  {/* Balance Sheet */}
-                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-amber-500" colSpan={financials.incomeStatements.length + 1}>BALANCE SHEET</td></tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Total Assets</td>
-                    {financials.balanceSheets.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.totalAssets, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Total Liabilities</td>
-                    {financials.balanceSheets.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.totalLiabilities, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Stockholders Equity</td>
-                    {financials.balanceSheets.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300 font-semibold">{formatCurrency(item.totalEquity, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr className="border-b border-zinc-800/80">
-                    <td className="p-3 text-zinc-400 font-medium">Total Debt</td>
-                    {financials.balanceSheets.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-red-400">{formatCurrency(item.totalDebt, profile.currency)}</td>
-                    ))}
-                  </tr>
-
-                  {/* Cash Flow */}
-                  <tr className="bg-zinc-800/30 font-bold"><td className="p-3 text-blue-400" colSpan={financials.incomeStatements.length + 1}>CASH FLOW STATEMENT</td></tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Operating Cash Flow</td>
-                    {financials.cashFlows.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-zinc-300">{formatCurrency(item.operatingCashFlow, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Capital Expenditure</td>
-                    {financials.cashFlows.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-red-400/80">-{formatCurrency(item.capitalExpenditure, profile.currency)}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-zinc-400 font-medium">Free Cash Flow</td>
-                    {financials.cashFlows.map((item) => (
-                      <td key={item.date} className="p-3 text-right text-teal-400 font-bold">{formatCurrency(item.freeCashFlow, profile.currency)}</td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ============================================================ */}
-        {/* TAB 4: PEER COMPARISON MATRIX                                */}
-        {/* ============================================================ */}
-        {(activeTab === 'peers' || exporting) && (
-          <div className="flex flex-col gap-4">
-            {exporting && <h2 className="text-xl font-bold text-white border-b border-zinc-800/80 pb-2 mt-8 uppercase tracking-wider">Comparative Peer multiples</h2>}
-            <PeerComparison
-              targetTicker={profile.ticker}
-              targetName={profile.name}
-              targetMetrics={metrics}
-            />
-          </div>
-        )}
-
-        {/* ============================================================ */}
-        {/* TAB 5: NEWS & SENTIMENTS                                     */}
-        {/* ============================================================ */}
-        {(activeTab === 'news' || exporting) && (
-          <div className="flex flex-col gap-6">
-            {exporting && <h2 className="text-xl font-bold text-white border-b border-zinc-800/80 pb-2 mt-8 uppercase tracking-wider">Market news & sentiment indices</h2>}
-            <div>
-              <h3 className="text-md font-bold text-white mb-2">Market Sentiment & News Recap</h3>
-              <p className="text-zinc-400 text-xs font-light leading-relaxed">{report.newsSummary}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {report.newsItems.slice(0, 6).map((item, idx) => {
-                const sentimentConfig = {
-                  POSITIVE: 'bg-green-500/10 text-green-400 border-green-500/20',
-                  NEGATIVE: 'bg-red-500/10 text-red-400 border-red-500/20',
-                  NEUTRAL: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-                };
-                const sc = sentimentConfig[item.sentiment.toUpperCase() as 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL'] || sentimentConfig.NEUTRAL;
-
-                return (
-                  <div key={idx} className="bg-zinc-900/40 backdrop-blur-sm shadow-sm border border-zinc-800/80 p-4 rounded-xl flex flex-col justify-between gap-3 hover:border-zinc-700 transition-all">
-                    <div>
-                      <div className="flex justify-between items-start gap-2 mb-2">
-                        <h4 className="text-xs font-bold text-white line-clamp-1">{item.title}</h4>
-                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded border shrink-0 ${sc}`}>
-                          {item.sentiment}
-                        </span>
+                <div className="flex flex-col gap-5 border-t border-[rgba(255,255,255,.04)] pt-8 min-w-0">
+                  <h2 className="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                    <Scale className="h-3.5 w-3.5" /> Investment Snapshot
+                  </h2>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
+                    {[
+                      { label: 'P/E Ratio (TTM)', val: metrics.peRatio?.toFixed(1) || 'N/A' },
+                      { label: 'Forward P/E', val: metrics.forwardPE?.toFixed(1) || 'N/A' },
+                      { label: 'ROE', val: formatPercentage(metrics.roe) },
+                      { label: 'ROCE', val: formatPercentage(metrics.roce) },
+                      { label: 'Dividend Yield', val: formatPercentage(metrics.dividendYield) },
+                      { label: 'Debt to Equity', val: metrics.debtToEquity?.toFixed(2) || 'N/A' },
+                      { label: 'EV / EBITDA', val: metrics.evToEbitda?.toFixed(1) || 'N/A' },
+                      { label: 'Beta', val: metrics.beta?.toFixed(2) || 'N/A' },
+                    ].map((m, i) => (
+                      <div key={i} className="bg-[rgba(255,255,255,.02)] border border-[rgba(255,255,255,.04)] p-4 rounded-xl flex flex-col gap-1.5 hover:bg-[rgba(255,255,255,.04)] transition-colors">
+                        <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">{m.label}</span>
+                        <span className="text-xl font-bold text-white">{m.val}</span>
                       </div>
-                      <p className="text-zinc-500 text-[10px] line-clamp-2 leading-relaxed mb-1 font-light">{item.snippet}</p>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] text-zinc-500 font-mono">
-                      <span>{item.source} • {item.date}</span>
-                      {item.url && (
-                        <a href={item.url} target="_blank" rel="noreferrer" className="text-teal-400 hover:underline flex items-center gap-0.5 font-semibold">
-                          Link <ExternalLink className="h-2.5 w-2.5" />
-                        </a>
-                      )}
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 border-t border-[rgba(255,255,255,.04)] pt-8 min-w-0">
+                  <div className="flex flex-col gap-4 min-w-0">
+                    <h2 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                      <Anchor className="h-3.5 w-3.5" /> Economic Moat
+                    </h2>
+                    <div className="text-sm lg:text-base text-zinc-400 leading-relaxed font-light [&_p]:mb-3 [&_strong]:text-zinc-200 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_li]:mb-1">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{report.moatAnalysis}</ReactMarkdown>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                  <div className="flex flex-col gap-4 min-w-0">
+                    <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                      <Lightbulb className="h-3.5 w-3.5" /> Growth Catalysts
+                    </h2>
+                    <ul className="flex flex-col gap-3 min-w-0">
+                      {report.growthCatalysts.map((cat, idx) => (
+                        <li key={idx} className="flex gap-3 p-4 rounded-xl bg-[rgba(255,255,255,.02)] border border-[rgba(255,255,255,.04)] min-w-0">
+                          <span className="text-emerald-400 font-bold shrink-0 text-sm">{idx + 1}.</span>
+                          <span className="text-zinc-300 text-sm font-medium">{cat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            )}
 
-        {/* SECTION 10: Disclaimer & Sensitivity Notes Footer (Always Visible) */}
-        <div className="border-t border-zinc-800/80 pt-6 flex flex-col md:flex-row justify-between text-[10px] text-zinc-500 gap-4 leading-relaxed font-light">
-          <div className="md:max-w-xl">
-            <strong className="text-zinc-400">Institutional Disclaimer:</strong> This equity research analysis is compiled automatically by Investryt AI based on LLM-synthesized data and financial wrappers. It does not constitute formal, licensed financial advice. Past performance is not indicative of future market returns.
-          </div>
-          <div className="md:max-w-md md:text-right">
-            <strong className="text-zinc-400">Sensitivity Notes:</strong> {report.sensitivityNotes}
-          </div>
-        </div>
+            {/* -------------------------------------------------------- */}
+            {/* FINANCIALS & CHARTS                                      */}
+            {/* -------------------------------------------------------- */}
+            {activeTab === 'financials' && (
+              <>
+                <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-4 bg-[rgba(18,18,20,.68)] border border-[rgba(255,255,255,.06)] rounded-2xl p-5 min-w-0">
+                    <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Revenue & EBITDA Trajectory</h2>
+                    <div className="w-full h-[260px] min-w-0">
+                      <RevenueChart years={financials.incomeStatements.map(i => i.date.slice(0,4)).reverse()} revenues={financials.incomeStatements.map(i => i.revenue).reverse()} ebitdas={financials.incomeStatements.map(i => i.ebitda).reverse()} currency={profile.currency} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-4 bg-[rgba(18,18,20,.68)] border border-[rgba(255,255,255,.06)] rounded-2xl p-5 min-w-0">
+                      <h2 className="text-xs font-bold text-purple-400 uppercase tracking-widest">Margin Expansion</h2>
+                      <div className="w-full h-[260px] min-w-0">
+                        <MarginTrendChart years={financials.incomeStatements.map(i => i.date.slice(0,4)).reverse()} grossMargins={financials.incomeStatements.map(i => i.grossProfitRatio*100).reverse()} ebitdaMargins={financials.incomeStatements.map(i => (i.ebitda/(i.revenue||1))*100).reverse()} netMargins={financials.incomeStatements.map(i => i.netIncomeRatio*100).reverse()} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-4 bg-[rgba(18,18,20,.68)] border border-[rgba(255,255,255,.06)] rounded-2xl p-5 min-w-0">
+                      <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Price Action</h2>
+                      <div className="w-full h-[260px] min-w-0">
+                         {priceHistory.length > 0 ? (
+                            <StockPriceChart prices={priceHistory} ticker={profile.ticker} currency={profile.currency} />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-zinc-600 font-bold uppercase tracking-widest text-xs">No Price Data Available</div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-xs font-bold text-white uppercase tracking-widest">Historical Financial Statements</h2>
+                  <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,.04)] bg-[rgba(255,255,255,.015)]">
+                    <table className="w-full text-left border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-[rgba(255,255,255,.03)]">
+                          <th className="p-4 text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Metric ({profile.currency})</th>
+                          {financials.incomeStatements.map(i => (
+                            <th key={i.date} className="p-4 text-zinc-300 font-bold uppercase tracking-widest text-[10px] text-right">{i.date.slice(0,4)}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[rgba(255,255,255,.04)]">
+                        <tr>
+                          <td className="p-4 text-zinc-400 font-medium text-xs">Revenue</td>
+                          {financials.incomeStatements.map(i => <td key={i.date} className="p-4 text-right font-mono text-white text-xs">{formatCurrency(i.revenue, profile.currency)}</td>)}
+                        </tr>
+                        <tr>
+                          <td className="p-4 text-zinc-400 font-medium text-xs">Operating Income</td>
+                          {financials.incomeStatements.map(i => <td key={i.date} className="p-4 text-right font-mono text-zinc-300 text-xs">{formatCurrency(i.operatingIncome, profile.currency)}</td>)}
+                        </tr>
+                        <tr>
+                          <td className="p-4 text-zinc-400 font-medium text-xs">Net Income</td>
+                          {financials.incomeStatements.map(i => <td key={i.date} className="p-4 text-right font-mono text-cyan-400 font-bold text-xs">{formatCurrency(i.netIncome, profile.currency)}</td>)}
+                        </tr>
+                        <tr>
+                          <td className="p-4 text-zinc-400 font-medium text-xs">Free Cash Flow</td>
+                          {financials.cashFlows.map(i => <td key={i.date} className="p-4 text-right font-mono text-emerald-400 font-bold text-xs">{formatCurrency(i.freeCashFlow, profile.currency)}</td>)}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'valuation' && (
+              <div className="flex flex-col gap-8">
+                <div className="bg-[rgba(18,18,20,.68)] border border-[rgba(255,255,255,.06)] rounded-2xl p-5">
+                  <h2 className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-5">DCF Simulator</h2>
+                  <DcfSimulator
+                    initialFcf={financials.cashFlows[0]?.freeCashFlow || 0}
+                    cash={financials.balanceSheets[0]?.cashAndEquivalents || 0}
+                    debt={financials.balanceSheets[0]?.totalDebt || 0}
+                    marketCap={profile.marketCap || 0}
+                    currentPrice={metrics.currentPrice || 0}
+                    currency={profile.currency}
+                    market={profile.ticker.toUpperCase().endsWith('.NS') || profile.currency === 'INR' ? 'INDIA' : 'US'}
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-xs font-bold text-white uppercase tracking-widest">AI Valuation Analysis</h2>
+                  <div className="text-sm text-zinc-400 leading-relaxed font-light bg-[rgba(255,255,255,.02)] border border-[rgba(255,255,255,.04)] p-5 rounded-xl [&_p]:mb-3 [&_p:last-child]:mb-0 [&_strong]:text-zinc-200 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_li]:mb-1">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{report.financialAnalysis.valuationAnalysis}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'peers' && (
+              <div className="flex flex-col gap-8">
+                <div className="bg-[rgba(18,18,20,.68)] border border-[rgba(255,255,255,.06)] rounded-2xl p-5">
+                  <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-5">Peer Multiples</h2>
+                  <PeerComparison targetTicker={profile.ticker} targetName={profile.name} targetMetrics={metrics} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'news' && (
+              <div className="flex flex-col gap-10">
+                
+                <div className="flex flex-col gap-5">
+                  <h2 className="text-xs font-bold text-red-400 uppercase tracking-widest flex items-center gap-2">
+                    <ShieldAlert className="h-3.5 w-3.5" /> Key Risk Factors
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {report.riskFactors.map((r, idx) => {
+                      const sev = r.severity.toUpperCase();
+                      let bc = 'bg-zinc-800 text-zinc-400 border-zinc-700';
+                      if (sev === 'HIGH') bc = 'bg-red-500/10 text-red-400 border-red-500/20';
+                      if (sev === 'MEDIUM') bc = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                      if (sev === 'LOW') bc = 'bg-green-500/10 text-green-400 border-green-500/20';
+                      
+                      return (
+                        <div key={idx} className="bg-[rgba(255,255,255,.02)] border border-[rgba(255,255,255,.04)] p-5 rounded-xl flex flex-col gap-3 min-w-0">
+                           <span className={`self-start px-2.5 py-1 text-[9px] font-black tracking-widest uppercase rounded-full border ${bc} shrink-0`}>
+                              {sev} RISK
+                           </span>
+                           <p className="text-zinc-300 text-sm leading-relaxed font-light">{r.risk}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-5 border-t border-[rgba(255,255,255,.04)] pt-8">
+                  <h2 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <Newspaper className="h-3.5 w-3.5" /> Market News & Sentiment
+                  </h2>
+                  <div className="text-zinc-400 text-sm font-light leading-relaxed [&_p]:mb-3 [&_p:last-child]:mb-0 [&_strong]:text-zinc-200 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_li]:mb-1">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{report.newsSummary}</ReactMarkdown>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {report.newsItems.slice(0, 9).map((item, idx) => {
+                      const sc = item.sentiment === 'POSITIVE' ? 'text-emerald-400 bg-emerald-500/10' :
+                                 item.sentiment === 'NEGATIVE' ? 'text-red-400 bg-red-500/10' : 'text-zinc-400 bg-zinc-800';
+                      return (
+                        <a key={idx} href={item.url} target="_blank" rel="noreferrer" className="group bg-[rgba(255,255,255,.02)] border border-[rgba(255,255,255,.04)] hover:border-cyan-500/30 p-5 rounded-xl flex flex-col justify-between gap-3 transition-colors min-w-0">
+                          <div className="flex flex-col gap-2 min-w-0">
+                             <div className="flex justify-between items-start gap-2 min-w-0">
+                                <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold truncate">{item.source}</span>
+                                <span className={`px-2 py-0.5 text-[8px] font-bold uppercase rounded-full shrink-0 ${sc}`}>{item.sentiment}</span>
+                             </div>
+                             <h4 className="text-sm font-bold text-zinc-200 group-hover:text-cyan-400 transition-colors line-clamp-2">{item.title}</h4>
+                             <p className="text-zinc-500 text-xs line-clamp-2 leading-relaxed font-light">{item.snippet}</p>
+                          </div>
+                          <span className="text-[9px] text-zinc-600 font-mono shrink-0">{item.date}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </motion.div>
+        </AnimatePresence>
       </div>
+
+      {/* Removed the Follow-up bar as per user request to keep input INSIDE the center panel only */}
+
+      {/* Hidden PDF template */}
+      <div className="absolute top-0 left-0 w-0 h-0 overflow-hidden opacity-0 pointer-events-none -z-50">
+        <PDFReportTemplate report={report} profile={profile} financials={financials} metrics={metrics} priceHistory={priceHistory} />
+      </div>
+
     </div>
   );
 }
