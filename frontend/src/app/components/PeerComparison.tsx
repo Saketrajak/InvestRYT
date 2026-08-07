@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Investryt AI — Dynamic Peer Comparison Component
+// Investryt AI — Dynamic Peer Comparison (Refined UI)
 // ============================================================
 
 import React, { useState } from 'react';
@@ -72,7 +72,7 @@ export default function PeerComparison({
   // Compile datasets for charts
   const chartCategories = [targetTicker, ...peers.map((p) => p.symbol)];
   const peValues = [targetMetrics.peRatio || 0, ...peers.map((p) => p.metrics.peRatio || 0)];
-  const roeValues = [targetMetrics.roe || 0, ...peers.map((p) => p.metrics.roe || 0)];
+  const roeValues = [targetMetrics.roe ? targetMetrics.roe * 100 : 0, ...peers.map((p) => (p.metrics.roe ? p.metrics.roe * 100 : 0))];
   const pbValues = [targetMetrics.pbRatio || 0, ...peers.map((p) => p.metrics.pbRatio || 0)];
 
   const buildChartOptions = (title: string, color: string): ApexCharts.ApexOptions => ({
@@ -85,7 +85,7 @@ export default function PeerComparison({
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: '40%',
+        columnWidth: '35%',
         borderRadius: 4,
         distributed: true,
       },
@@ -97,7 +97,7 @@ export default function PeerComparison({
       axisTicks: { show: false },
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
@@ -105,121 +105,144 @@ export default function PeerComparison({
     yaxis: {
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
     },
     grid: {
-      borderColor: '#232326',
+      borderColor: '#27272a/45',
       strokeDashArray: 4,
     },
     legend: { show: false },
+    tooltip: {
+      theme: 'dark',
+    }
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-[32px]">
+      
       {/* Search Input Box */}
-      <div className="bg-[#141416] border border-[#232326] p-5 rounded-xl">
-        <h3 className="text-md font-bold text-white mb-2">Build Peer Comparison Panel</h3>
-        <p className="text-xs text-zinc-500 font-light mb-4">
-          Fetch comparative valuation multiples dynamically from Yahoo Finance. Enter ticker code (e.g. MSFT, GOOG, TCS.NS)
-        </p>
+      <div className="bg-[#0c0c0e]/40 border border-zinc-800 p-[24px] rounded-[16px] flex flex-col gap-[16px] shadow-sm">
+        <div>
+          <h3 className="text-[16px] font-bold text-white uppercase tracking-wider">Build Peer Comparison Panel</h3>
+          <p className="text-[12px] text-zinc-500 font-light mt-[4px]">
+            Fetch comparative valuation multiples dynamically from Yahoo Finance. Enter ticker code (e.g. MSFT, GOOG, TCS.NS)
+          </p>
+        </div>
 
-        <form onSubmit={handleAddPeer} className="flex gap-2 max-w-md">
+        <form onSubmit={handleAddPeer} className="flex gap-[12px] max-w-md w-full">
           <input
             type="text"
             placeholder="Enter peer symbol (e.g., MSFT)..."
             value={peerInput}
             onChange={(e) => setPeerInput(e.target.value)}
             disabled={fetching}
-            className="flex-1 bg-[#09090b] border border-[#232326] focus:border-teal-500 rounded-lg text-sm px-4 py-2 outline-none text-white font-mono placeholder-zinc-600"
+            className="flex-1 h-[44px] bg-[#060608] border border-zinc-800 focus:border-cyan-500 rounded-[12px] text-[14px] px-[16px] outline-none text-white font-mono placeholder-zinc-650 transition-colors"
           />
           <button
             type="submit"
             disabled={fetching || !peerInput.trim()}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg font-semibold text-sm transition-all flex items-center gap-1 shrink-0 uppercase tracking-wider"
+            className="h-[44px] px-[20px] bg-cyan-600 hover:bg-cyan-500 disabled:bg-zinc-900 disabled:text-zinc-600 text-white rounded-[12px] font-bold text-[12px] uppercase tracking-widest transition-all duration-200 flex items-center gap-[8px] shrink-0 justify-center cursor-pointer"
           >
-            {fetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Add Peer
+            {fetching ? <Loader2 className="h-[14px] w-[14px] animate-spin" /> : <Plus className="h-[14px] w-[14px]" />}
+            <span>Add Peer</span>
           </button>
         </form>
 
         {error && (
-          <div className="flex items-center gap-2 text-red-400 text-xs mt-3 bg-red-500/5 p-2 rounded-lg border border-red-500/10">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-[8px] text-red-400 text-[12px] bg-red-500/5 p-[12px] rounded-[12px] border border-red-500/10 self-start">
+            <AlertCircle className="h-[14px] w-[14px] shrink-0" />
             <span>{error}</span>
           </div>
         )}
       </div>
 
       {/* Active Peer Cards */}
-      {peers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-[#141416]/50 border border-teal-500/30 p-4 rounded-xl relative">
-            <span className="absolute top-2.5 right-3 text-[10px] font-bold text-teal-400 border border-teal-500/20 bg-teal-500/5 px-2 py-0.5 rounded uppercase tracking-wider">Target</span>
-            <h4 className="font-bold text-white truncate max-w-[80%]">{targetName}</h4>
-            <span className="text-zinc-500 text-xs font-mono">{targetTicker}</span>
-            <div className="mt-4 flex gap-4 text-xs font-light">
-              <div>P/E: <strong className="text-white font-bold">{targetMetrics.peRatio?.toFixed(1) || 'N/A'}</strong></div>
-              <div>ROE: <strong className="text-white font-bold">{targetMetrics.roe ? `${targetMetrics.roe.toFixed(1)}%` : 'N/A'}</strong></div>
-              <div>P/B: <strong className="text-white font-bold">{targetMetrics.pbRatio?.toFixed(1) || 'N/A'}</strong></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[24px]">
+        {/* Target Stock */}
+        <div className="bg-cyan-950/5 border border-cyan-500/20 p-[24px] rounded-[16px] relative flex flex-col justify-between min-h-[140px]">
+          <span className="absolute top-[16px] right-[16px] text-[8px] font-black text-cyan-400 border border-cyan-500/25 bg-cyan-500/10 px-[10px] py-[3px] rounded-lg uppercase tracking-wider select-none">
+            Target
+          </span>
+          <div className="min-w-0 pr-[64px]">
+            <h4 className="font-bold text-white text-[16px] truncate">{targetName}</h4>
+            <span className="text-zinc-500 text-[12px] font-mono">{targetTicker}</span>
+          </div>
+          <div className="mt-[20px] flex gap-[24px] text-[12px] font-medium text-zinc-400 border-t border-zinc-850 pt-[12px]">
+            <div>P/E: <strong className="text-white font-bold">{targetMetrics.peRatio?.toFixed(1) || 'N/A'}</strong></div>
+            <div>ROE: <strong className="text-white font-bold">{targetMetrics.roe ? `${(targetMetrics.roe * 100).toFixed(1)}%` : 'N/A'}</strong></div>
+            <div>P/B: <strong className="text-white font-bold">{targetMetrics.pbRatio?.toFixed(1) || 'N/A'}</strong></div>
+          </div>
+        </div>
+
+        {/* Competitor Peers */}
+        {peers.map((peer, idx) => (
+          <div key={idx} className="bg-[#0c0c0e]/40 border border-zinc-800 p-[24px] rounded-[16px] relative group flex flex-col justify-between min-h-[140px] hover:border-zinc-700 transition-colors duration-300">
+            <button
+              onClick={() => handleRemovePeer(idx)}
+              className="absolute top-[16px] right-[16px] text-zinc-600 hover:text-red-400 transition-colors duration-200 p-1 cursor-pointer"
+              title="Remove peer"
+            >
+              <Trash2 className="h-[14px] w-[14px]" />
+            </button>
+            <div className="min-w-0 pr-[32px]">
+              <h4 className="font-bold text-white text-[16px] truncate">{peer.name}</h4>
+              <span className="text-zinc-500 text-[12px] font-mono">{peer.symbol}</span>
+            </div>
+            <div className="mt-[20px] flex gap-[24px] text-[12px] font-medium text-zinc-400 border-t border-zinc-850 pt-[12px]">
+              <div>P/E: <strong className="text-white font-bold">{peer.metrics.peRatio?.toFixed(1) || 'N/A'}</strong></div>
+              <div>ROE: <strong className="text-white font-bold">{peer.metrics.roe ? `${(peer.metrics.roe * 100).toFixed(1)}%` : 'N/A'}</strong></div>
+              <div>P/B: <strong className="text-white font-bold">{peer.metrics.pbRatio?.toFixed(1) || 'N/A'}</strong></div>
             </div>
           </div>
-
-          {peers.map((peer, idx) => (
-            <div key={idx} className="bg-[#141416]/50 border border-[#232326] p-4 rounded-xl relative group">
-              <button
-                onClick={() => handleRemovePeer(idx)}
-                className="absolute top-2.5 right-3 text-zinc-600 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-              <h4 className="font-bold text-white truncate max-w-[80%]">{peer.name}</h4>
-              <span className="text-zinc-500 text-xs font-mono">{peer.symbol}</span>
-              <div className="mt-4 flex gap-4 text-xs font-light">
-                <div>P/E: <strong className="text-white font-bold">{peer.metrics.peRatio?.toFixed(1) || 'N/A'}</strong></div>
-                <div>ROE: <strong className="text-white font-bold">{peer.metrics.roe ? `${peer.metrics.roe.toFixed(1)}%` : 'N/A'}</strong></div>
-                <div>P/B: <strong className="text-white font-bold">{peer.metrics.pbRatio?.toFixed(1) || 'N/A'}</strong></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        ))}
+      </div>
 
       {/* Comparison Multiples Charts */}
       {peers.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-[#141416] border border-[#232326] p-5 rounded-xl">
-            <h4 className="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-              <BarChart3 className="h-4 w-4 text-teal-400" /> P/E Ratio Comparison
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[24px] items-stretch">
+          
+          <div className="bg-[#0c0c0e]/40 border border-zinc-800 p-[32px] rounded-[16px] flex flex-col justify-between shadow-sm min-h-[360px]">
+            <h4 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-[8px]">
+              P/E Ratio Comparison
             </h4>
-            <div className="h-56">
-              <Chart options={buildChartOptions('PE', '#14b8a6')} series={[{ name: 'P/E', data: peValues }]} type="bar" height="100%" />
+            <div className="h-[220px] mt-[20px]">
+              <Chart options={buildChartOptions('PE', '#06b6d4')} series={[{ name: 'P/E', data: peValues }]} type="bar" height="100%" />
             </div>
           </div>
 
-          <div className="bg-[#141416] border border-[#232326] p-5 rounded-xl">
-            <h4 className="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-              <BarChart3 className="h-4 w-4 text-amber-500" /> Return on Equity (ROE) Comparison
+          <div className="bg-[#0c0c0e]/40 border border-zinc-800 p-[32px] rounded-[16px] flex flex-col justify-between shadow-sm min-h-[360px]">
+            <h4 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-[8px]">
+              ROE (%) Comparison
             </h4>
-            <div className="h-56">
-              <Chart options={buildChartOptions('ROE', '#f59e0b')} series={[{ name: 'ROE (%)', data: roeValues }]} type="bar" height="100%" />
+            <div className="h-[220px] mt-[20px]">
+              <Chart options={buildChartOptions('ROE', '#eab308')} series={[{ name: 'ROE (%)', data: roeValues }]} type="bar" height="100%" />
             </div>
           </div>
 
-          <div className="bg-[#141416] border border-[#232326] p-5 rounded-xl">
-            <h4 className="text-xs font-bold text-zinc-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-              <BarChart3 className="h-4 w-4 text-blue-500" /> Price to Book (P/B) Comparison
+          <div className="bg-[#0c0c0e]/40 border border-zinc-800 p-[32px] rounded-[16px] flex flex-col justify-between shadow-sm min-h-[360px]">
+            <h4 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-[8px]">
+              P/B Ratio Comparison
             </h4>
-            <div className="h-56">
+            <div className="h-[220px] mt-[20px]">
               <Chart options={buildChartOptions('PB', '#3b82f6')} series={[{ name: 'P/B', data: pbValues }]} type="bar" height="100%" />
             </div>
           </div>
+
         </div>
       ) : (
-        <div className="w-full bg-[#141416]/50 border border-[#232326] rounded-xl p-12 text-center text-zinc-500">
-          No peers added. Add competitor symbols above to unlock side-by-side interactive multiple charts!
+        <div className="w-full bg-[#0c0c0e]/40 border border-zinc-800 rounded-[16px] p-[64px] flex flex-col items-center justify-center text-center gap-[20px] shadow-md">
+          <div className="p-[20px] bg-cyan-500/5 rounded-full border border-cyan-500/10">
+            <BarChart3 className="h-[40px] w-[40px] text-cyan-400 animate-pulse" />
+          </div>
+          <div className="max-w-[440px]">
+            <h4 className="text-[16px] font-bold text-white uppercase tracking-wider">No Competitors Added</h4>
+            <p className="text-[14px] text-zinc-500 font-light mt-[8px] leading-relaxed">
+              Add competitor stock tickers above (e.g. MSFT, GOOG, TCS.NS) to dynamically compile comparative multiples and side-by-side multiple comparison charts.
+            </p>
+          </div>
         </div>
       )}
     </div>

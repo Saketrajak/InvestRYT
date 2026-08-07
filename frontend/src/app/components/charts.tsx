@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Investryt AI — Premium Chart Components
+// Investryt AI — Premium Chart Components (Refined UI)
 // ============================================================
 
 import React from 'react';
@@ -34,11 +34,11 @@ export function RevenueChart({ years, revenues, ebitdas, currency }: RevenueChar
       toolbar: { show: false },
       background: 'transparent',
     },
-    colors: ['#14b8a6', '#f59e0b'],
+    colors: ['#06b6d4', '#eab308'], // Sleek cyan & gold
     plotOptions: {
       bar: {
         horizontal: false,
-        columnWidth: '55%',
+        columnWidth: '45%',
         borderRadius: 4,
       },
     },
@@ -54,7 +54,7 @@ export function RevenueChart({ years, revenues, ebitdas, currency }: RevenueChar
       axisTicks: { show: false },
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
@@ -63,13 +63,14 @@ export function RevenueChart({ years, revenues, ebitdas, currency }: RevenueChar
       labels: {
         formatter: (val) => formatShort(val),
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
     },
-    fill: { opacity: 0.95 },
+    fill: { opacity: 0.9 },
     tooltip: {
+      theme: 'dark',
       y: {
         formatter: (val) => `${formatShort(val)} ${currency}`,
       },
@@ -77,16 +78,18 @@ export function RevenueChart({ years, revenues, ebitdas, currency }: RevenueChar
     legend: {
       position: 'top',
       horizontalAlign: 'right',
+      fontFamily: 'var(--font-body)',
+      fontWeight: 600,
+      fontSize: '11px',
       labels: {
-        colors: '#f4f4f5',
-        useSeriesColors: false,
+        colors: '#a1a1aa',
       },
       markers: {
         strokeWidth: 0,
       },
     },
     grid: {
-      borderColor: '#232326',
+      borderColor: '#27272a/40',
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
@@ -99,9 +102,9 @@ export function RevenueChart({ years, revenues, ebitdas, currency }: RevenueChar
   ];
 
   return (
-    <div className="w-full h-80 bg-[#141416] p-5 rounded-xl border border-[#232326]">
-      <h3 className="text-sm font-semibold text-zinc-400 mb-4 uppercase tracking-wider">Revenue & EBITDA Trend</h3>
-      <div className="w-full h-64">
+    <div className="w-full h-[380px] bg-[#0c0c0e]/40 p-[32px] rounded-[16px] border border-zinc-800 flex flex-col justify-between shadow-md">
+      <h3 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest">Revenue & EBITDA Trajectory</h3>
+      <div className="w-full h-[260px] mt-[16px]">
         <Chart options={options} series={series} type="bar" height="100%" />
       </div>
     </div>
@@ -125,17 +128,17 @@ export function StockPriceChart({ prices, ticker, currency }: StockPriceChartPro
       sparkline: { enabled: false },
       background: 'transparent',
     },
-    colors: ['#14b8a6'],
+    colors: ['#06b6d4'],
     stroke: {
       curve: 'smooth',
-      width: 2.5,
+      width: 2,
     },
     fill: {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
+        opacityFrom: 0.35,
+        opacityTo: 0.02,
         stops: [0, 95],
       },
     },
@@ -146,27 +149,28 @@ export function StockPriceChart({ prices, ticker, currency }: StockPriceChartPro
       axisTicks: { show: false },
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
-      tickAmount: 6,
+      tickAmount: 5,
     },
     yaxis: {
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
     },
     grid: {
-      borderColor: '#232326',
+      borderColor: '#27272a/40',
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
     },
     tooltip: {
+      theme: 'dark',
       x: { format: 'dd MMM yyyy' },
       y: {
         formatter: (val) => `${val.toFixed(2)} ${currency}`,
@@ -177,9 +181,9 @@ export function StockPriceChart({ prices, ticker, currency }: StockPriceChartPro
   const series = [{ name: `${ticker} Price`, data: values }];
 
   return (
-    <div className="w-full h-80 bg-[#141416] p-5 rounded-xl border border-[#232326]">
-      <h3 className="text-sm font-semibold text-zinc-400 mb-4 uppercase tracking-wider">1-Year Stock Price Chart</h3>
-      <div className="w-full h-64">
+    <div className="w-full h-[380px] bg-[#0c0c0e]/40 p-[32px] rounded-[16px] border border-zinc-800 flex flex-col justify-between shadow-md">
+      <h3 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest">1-Year Historical Price</h3>
+      <div className="w-full h-[260px] mt-[16px]">
         <Chart options={options} series={series} type="area" height="100%" />
       </div>
     </div>
@@ -212,20 +216,20 @@ export function RadarChart({ metrics, verdict }: RadarChartProps) {
       toolbar: { show: false },
       background: 'transparent',
     },
-    colors: ['#f59e0b'],
+    colors: ['#eab308'],
     stroke: {
       show: true,
       width: 2,
-      colors: ['#f59e0b'],
+      colors: ['#eab308'],
     },
     fill: {
-      opacity: 0.25,
-      colors: ['#f59e0b'],
+      opacity: 0.2,
+      colors: ['#eab308'],
     },
     markers: {
       size: 4,
-      colors: ['#09090b'],
-      strokeColors: '#f59e0b',
+      colors: ['#060608'],
+      strokeColors: '#eab308',
       strokeWidth: 2,
     },
     xaxis: {
@@ -239,8 +243,8 @@ export function RadarChart({ metrics, verdict }: RadarChartProps) {
       ],
       labels: {
         style: {
-          colors: ['#a1a1aa', '#a1a1aa', '#a1a1aa', '#a1a1aa', '#a1a1aa', '#a1a1aa'],
-          fontSize: '11px',
+          colors: ['#71717a', '#71717a', '#71717a', '#71717a', '#71717a', '#71717a'],
+          fontSize: '10px',
           fontFamily: 'var(--font-body)',
         },
       },
@@ -270,9 +274,9 @@ export function RadarChart({ metrics, verdict }: RadarChartProps) {
   ];
 
   return (
-    <div className="w-full h-80 bg-[#141416] p-5 rounded-xl border border-[#232326] flex flex-col justify-between">
-      <h3 className="text-sm font-semibold text-zinc-400 mb-1 uppercase tracking-wider">Financial Radar Score</h3>
-      <div className="w-full h-64 flex items-center justify-center">
+    <div className="w-full h-[380px] bg-[#0c0c0e]/40 p-[32px] rounded-[16px] border border-zinc-800 flex flex-col justify-between shadow-md">
+      <h3 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest">Financial Radar Matrix</h3>
+      <div className="w-full h-[260px] mt-[16px] flex items-center justify-center">
         <Chart options={options} series={series} type="radar" height="100%" width="100%" />
       </div>
     </div>
@@ -293,10 +297,10 @@ export function MarginTrendChart({ years, grossMargins, ebitdaMargins, netMargin
       toolbar: { show: false },
       background: 'transparent',
     },
-    colors: ['#14b8a6', '#f59e0b', '#3b82f6'],
+    colors: ['#06b6d4', '#eab308', '#3b82f6'],
     stroke: {
       curve: 'straight',
-      width: 2.5,
+      width: 2,
     },
     xaxis: {
       categories: years,
@@ -304,7 +308,7 @@ export function MarginTrendChart({ years, grossMargins, ebitdaMargins, netMargin
       axisTicks: { show: false },
       labels: {
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
@@ -313,18 +317,19 @@ export function MarginTrendChart({ years, grossMargins, ebitdaMargins, netMargin
       labels: {
         formatter: (val) => `${val.toFixed(1)}%`,
         style: {
-          colors: '#a1a1aa',
+          colors: '#71717a',
           fontFamily: 'var(--font-body)',
         },
       },
     },
     grid: {
-      borderColor: '#232326',
+      borderColor: '#27272a/40',
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
     },
     tooltip: {
+      theme: 'dark',
       y: {
         formatter: (val) => `${val.toFixed(2)}%`,
       },
@@ -332,9 +337,11 @@ export function MarginTrendChart({ years, grossMargins, ebitdaMargins, netMargin
     legend: {
       position: 'top',
       horizontalAlign: 'right',
+      fontFamily: 'var(--font-body)',
+      fontSize: '11px',
+      fontWeight: 600,
       labels: {
-        colors: '#f4f4f5',
-        useSeriesColors: false,
+        colors: '#a1a1aa',
       },
     },
   };
@@ -346,9 +353,9 @@ export function MarginTrendChart({ years, grossMargins, ebitdaMargins, netMargin
   ];
 
   return (
-    <div className="w-full h-80 bg-[#141416] p-5 rounded-xl border border-[#232326]">
-      <h3 className="text-sm font-semibold text-zinc-400 mb-4 uppercase tracking-wider">Margin Trend Analysis</h3>
-      <div className="w-full h-64">
+    <div className="w-full h-[380px] bg-[#0c0c0e]/40 p-[32px] rounded-[16px] border border-zinc-800 flex flex-col justify-between shadow-md">
+      <h3 className="text-[12px] font-bold text-zinc-500 uppercase tracking-widest">Profitability Margins</h3>
+      <div className="w-full h-[260px] mt-[16px]">
         <Chart options={options} series={series} type="line" height="100%" />
       </div>
     </div>
