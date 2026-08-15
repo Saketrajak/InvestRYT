@@ -29,12 +29,14 @@ export default function Home() {
       </main>
 
       <footer className="w-full bg-[#09090b] border-t border-[#232326] px-6 py-6 text-center text-xs text-zinc-600 font-light flex flex-col sm:flex-row justify-between items-center gap-4 z-20 relative">
-        <div>
-          &copy; 2026 Investryt AI. All rights reserved. Developed for InsideIIM &times; Altuni AI Labs.
-        </div>
-        <div className="flex items-center gap-1.5 text-zinc-500 font-medium">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          Powered by Gemini 2.5 &amp; Tavily Search Engines
+        <div className="w-full max-w-[1500px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            &copy; 2026 Investryt AI. All rights reserved. Developed for InsideIIM &times; Altuni AI Labs.
+          </div>
+          <div className="flex items-center gap-1.5 text-zinc-500 font-medium">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            Powered by Gemini 2.5 &amp; Tavily Search Engines
+          </div>
         </div>
       </footer>
     </div>

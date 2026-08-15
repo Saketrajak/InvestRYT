@@ -307,9 +307,9 @@ export default function ReportDetails({
                 <div className="flex flex-col gap-[48px]">
                   
                   {/* Title & Desc */}
-                  <div>
-                    <h2 className="text-[28px] font-black text-white tracking-tight uppercase tracking-wide">Executive Summary</h2>
-                    <p className="text-[14px] text-zinc-500 font-light mt-[4px]">AI investment thesis, economic moat factors, and historical business multiples.</p>
+                  <div className="section-head">
+                    <h2 className="section-title">Executive Summary</h2>
+                    <p className="section-desc">AI investment thesis, economic moat factors, and historical business multiples.</p>
                   </div>
 
                   {/* Thesis & Business Overview Card Split */}
@@ -423,9 +423,9 @@ export default function ReportDetails({
                 <div className="flex flex-col gap-[48px]">
                   
                   {/* Title & Desc */}
-                  <div>
-                    <h2 className="text-[28px] font-black text-white tracking-tight uppercase tracking-wide">Financial Performance</h2>
-                    <p className="text-[14px] text-zinc-500 font-light mt-[4px]">Historical bar trends, operating margins, and dynamic 1-year price chart.</p>
+                  <div className="section-head">
+                    <h2 className="section-title">Financial Performance</h2>
+                    <p className="section-desc">Historical bar trends, operating margins, and dynamic 1-year price chart.</p>
                   </div>
 
                   {/* Revenue & Margin Charts side by side */}
@@ -503,9 +503,9 @@ export default function ReportDetails({
                 <div className="flex flex-col gap-[48px]">
                   
                   {/* Title & Desc */}
-                  <div>
-                    <h2 className="text-[28px] font-black text-white tracking-tight uppercase tracking-wide">Valuation Modeling</h2>
-                    <p className="text-[14px] text-zinc-500 font-light mt-[4px]">Simulate intrinsic fair value estimates using growth and WACC perpetuity multipliers.</p>
+                  <div className="section-head">
+                    <h2 className="section-title">Valuation Modeling</h2>
+                    <p className="section-desc">Simulate intrinsic fair value estimates using growth and WACC perpetuity multipliers.</p>
                   </div>
 
                   {/* Simulator Grid */}
@@ -539,9 +539,9 @@ export default function ReportDetails({
                 <div className="flex flex-col gap-[48px]">
                   
                   {/* Title & Desc */}
-                  <div>
-                    <h2 className="text-[28px] font-black text-white tracking-tight uppercase tracking-wide">Competitor Analysis</h2>
-                    <p className="text-[14px] text-zinc-500 font-light mt-[4px]">Compare comparative valuation multiples side-by-side with global peers.</p>
+                  <div className="section-head">
+                    <h2 className="section-title">Competitor Analysis</h2>
+                    <p className="section-desc">Compare comparative valuation multiples side-by-side with global peers.</p>
                   </div>
 
                   {/* Peer comparison panel */}
@@ -557,9 +557,9 @@ export default function ReportDetails({
                 <div className="flex flex-col gap-[48px]">
                   
                   {/* Title & Desc */}
-                  <div>
-                    <h2 className="text-[28px] font-black text-white tracking-tight uppercase tracking-wide">Market News & Risks</h2>
-                    <p className="text-[14px] text-zinc-500 font-light mt-[4px]">Scan critical corporate risk threats and read recent sentiment logs.</p>
+                  <div className="section-head">
+                    <h2 className="section-title">Market News & Risks</h2>
+                    <p className="section-desc">Scan critical corporate risk threats and read recent sentiment logs.</p>
                   </div>
 
                   {/* Risks grid */}
