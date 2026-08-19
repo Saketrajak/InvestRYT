@@ -86,7 +86,7 @@ const nodes = [
           <thead>
             <tr className="border-b border-zinc-800">
               <th className="text-left font-semibold text-zinc-500 pb-2">Metric</th>
-              {['FY21','FY22','FY23','FY24','FY25'].map(y => (
+              {['FY21', 'FY22', 'FY23', 'FY24', 'FY25'].map(y => (
                 <th key={y} className="text-right font-semibold text-zinc-500 pb-2">{y}</th>
               ))}
             </tr>
@@ -244,7 +244,7 @@ const KeyPoolBento = () => {
       <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-widest mb-3">Key Pool Status</div>
       {keys.map((k, i) => (
         <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${k.active ? 'bg-zinc-900 border-zinc-800' : 'bg-red-500/5 border-red-500/10'}`}>
-          <span className="text-xs font-mono text-zinc-400">gemini-key-{i+1}{k.suffix}</span>
+          <span className="text-xs font-mono text-zinc-400">gemini-key-{i + 1}{k.suffix}</span>
           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${k.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>{k.status}</span>
         </div>
       ))}
@@ -436,18 +436,16 @@ export default function Features() {
                       onClick={() => setActiveNode(idx)}
                       className="flex flex-col items-center gap-2 group"
                     >
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                        isActive
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive
                           ? 'bg-teal-500 border-teal-500 shadow-[0_0_16px_rgba(20,184,166,0.5)]'
                           : isPast
-                          ? 'bg-zinc-800 border-zinc-700'
-                          : 'bg-zinc-900 border-zinc-800 group-hover:border-zinc-600'
-                      }`}>
+                            ? 'bg-zinc-800 border-zinc-700'
+                            : 'bg-zinc-900 border-zinc-800 group-hover:border-zinc-600'
+                        }`}>
                         <NodeIcon className={`h-4 w-4 ${isActive ? 'text-white' : isPast ? 'text-zinc-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
                       </div>
-                      <span className={`text-[11px] font-semibold transition-colors whitespace-nowrap ${
-                        isActive ? 'text-teal-400' : 'text-zinc-500 group-hover:text-zinc-300'
-                      }`}>{node.label}</span>
+                      <span className={`text-[11px] font-semibold transition-colors whitespace-nowrap ${isActive ? 'text-teal-400' : 'text-zinc-500 group-hover:text-zinc-300'
+                        }`}>{node.label}</span>
                     </button>
                   );
                 })}

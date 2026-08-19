@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { motion } from 'framer-motion';
-import { 
+import {
   Terminal, Code2, Link2, Copy, Check, Zap, Server, Shield
 } from 'lucide-react';
 
@@ -138,7 +138,7 @@ export default function ApiDocs() {
           {apiEndpoints.map((endpoint, idx) => {
             const currentCodeText = activeTab[idx] === 'curl' ? endpoint.code.curl : endpoint.code.nodejs;
             return (
-              <div 
+              <div
                 key={idx}
                 className="border border-zinc-800 bg-zinc-950/20 rounded-3xl p-6 md:p-8 shadow-xl"
               >
@@ -187,21 +187,19 @@ export default function ApiDocs() {
                       <div className="flex gap-2 bg-zinc-900/60 p-0.5 rounded-lg border border-zinc-800/80">
                         <button
                           onClick={() => setActiveTab(prev => ({ ...prev, [idx]: 'curl' }))}
-                          className={`px-2 py-1 text-2xs font-mono rounded-md transition-colors ${
-                            activeTab[idx] === 'curl' 
-                              ? 'bg-teal-500/10 text-teal-400 border border-teal-500/15' 
+                          className={`px-2 py-1 text-2xs font-mono rounded-md transition-colors ${activeTab[idx] === 'curl'
+                              ? 'bg-teal-500/10 text-teal-400 border border-teal-500/15'
                               : 'text-zinc-500 hover:text-zinc-300'
-                          }`}
+                            }`}
                         >
                           cURL
                         </button>
                         <button
                           onClick={() => setActiveTab(prev => ({ ...prev, [idx]: 'nodejs' }))}
-                          className={`px-2 py-1 text-2xs font-mono rounded-md transition-colors ${
-                            activeTab[idx] === 'nodejs' 
-                              ? 'bg-teal-500/10 text-teal-400 border border-teal-500/15' 
+                          className={`px-2 py-1 text-2xs font-mono rounded-md transition-colors ${activeTab[idx] === 'nodejs'
+                              ? 'bg-teal-500/10 text-teal-400 border border-teal-500/15'
                               : 'text-zinc-500 hover:text-zinc-300'
-                          }`}
+                            }`}
                         >
                           Node.js
                         </button>

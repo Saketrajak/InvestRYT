@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, Terminal, Code, Settings, 
+import {
+  BookOpen, Terminal, Code, Settings,
   ChevronRight, ArrowRight, Shield, Zap, Sparkles
 } from 'lucide-react';
 
@@ -164,11 +164,10 @@ export default function Documentation() {
                       setActiveSection(sec.id);
                       document.getElementById(sec.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl border flex items-center gap-3 transition-all ${
-                      isActive 
-                        ? 'bg-teal-500/10 border-teal-500/20 text-teal-400 font-semibold' 
+                    className={`w-full text-left px-3 py-2.5 rounded-xl border flex items-center gap-3 transition-all ${isActive
+                        ? 'bg-teal-500/10 border-teal-500/20 text-teal-400 font-semibold'
                         : 'bg-transparent border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/30'
-                    }`}
+                      }`}
                   >
                     <SecIcon className="h-4.5 w-4.5" />
                     <span className="text-sm">{sec.title.split('. ')[1]}</span>
@@ -184,8 +183,8 @@ export default function Documentation() {
           {docSections.map((sec) => {
             const SecIcon = sec.icon;
             return (
-              <div 
-                key={sec.id} 
+              <div
+                key={sec.id}
                 id={sec.id}
                 className="scroll-mt-[100px] border border-zinc-800/80 bg-zinc-950/30 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl"
               >

@@ -51,9 +51,8 @@ export default function Header({ showNewResearch, onNewResearch }: HeaderProps) 
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-[14px] font-semibold transition-colors duration-200 py-1 relative ${
-                  isActive ? 'text-teal-400' : 'text-zinc-400 hover:text-white'
-                }`}
+                className={`text-[14px] font-semibold transition-colors duration-200 py-1 relative ${isActive ? 'text-teal-400' : 'text-zinc-400 hover:text-white'
+                  }`}
               >
                 {item.name}
                 {isActive && (
