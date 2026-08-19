@@ -151,7 +151,7 @@ export default function ReportDetails({
     <div className="w-full min-h-screen bg-[#060608] text-zinc-300 flex flex-col relative overflow-y-auto overflow-x-hidden pb-[80px]">
       
       {/* Centered Premium Page Wrapper */}
-      <div className="max-w-[1500px] w-full mx-auto px-[40px] pt-[32px] pb-[80px] flex flex-col gap-[40px] min-w-0 relative z-10">
+      <div className="site-container pt-8 pb-20 flex flex-col gap-10 min-w-0 relative z-10">
         
         {/* 1. COMPANY HEADER */}
         <div className="flex flex-col xl:flex-row justify-between items-start gap-[24px] relative min-w-0">

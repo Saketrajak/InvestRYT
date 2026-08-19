@@ -83,7 +83,7 @@ export default function SearchHero({ onSearch }: SearchHeroProps) {
         <ThreeDMarquee images={marqueeImages} className="w-full h-full max-w-none" />
       </div>
 
-      <div className="relative z-10 max-w-[1150px] w-full mx-auto flex flex-col items-start pt-24 pb-12 px-6 pointer-events-none">
+      <div className="site-container relative z-10 w-full flex flex-col items-start pt-24 pb-12 pointer-events-none">
         <div className="w-full flex flex-col items-start">
 
           {/* Badge */}

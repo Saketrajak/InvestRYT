@@ -20,8 +20,8 @@
   --muted-foreground: #a1a1aa;
 
   --accent-invest: #10b981; /* Emerald/Green */
-  --accent-pass: #ef4444; /* Red */
-  --accent-hold: #3b82f6; /* Blue */
+  --accent-pass: #ef4444;   /* Red */
+  --accent-hold: #3b82f6;   /* Blue */
 
   --glow-teal: 0 0 20px rgba(20, 184, 166, 0.15);
   --glow-gold: 0 0 20px rgba(245, 158, 11, 0.15);
@@ -98,34 +98,28 @@ h1, h2, h3, h4, h5, h6 {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--muted);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
 
-/* Animations Helper */
+/* Animations */
 .fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ApexCharts Overrides for Dark Theme */
-.apexcharts-canvas {
-  background: transparent !important;
-}
+.apexcharts-canvas { background: transparent !important; }
 .apexcharts-tooltip {
   background: var(--card) !important;
   border: 1px solid var(--card-border) !important;
@@ -136,37 +130,23 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--muted) !important;
   border-bottom: 1px solid var(--card-border) !important;
 }
-.apexcharts-text {
-  fill: var(--muted-foreground) !important;
-  font-family: var(--font-body) !important;
-}
-.apexcharts-gridline {
-  stroke: var(--card-border) !important;
-}
-.apexcharts-radialbar-track {
-  stroke: var(--muted) !important;
-}
+.apexcharts-text      { fill: var(--muted-foreground) !important; font-family: var(--font-body) !important; }
+.apexcharts-gridline  { stroke: var(--card-border) !important; }
+.apexcharts-radialbar-track { stroke: var(--muted) !important; }
 
 @theme inline {
   --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
-  
   @keyframes scroll {
-    to {
-      transform: translate(calc(-50% - 0.5rem));
-    }
+    to { transform: translate(calc(-50% - 0.5rem)); }
   }
 }
 
 /* Premium Glass Reflection */
-.glass-reflection {
-  position: relative;
-}
+.glass-reflection { position: relative; }
 .glass-reflection::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 40%;
   background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
   pointer-events: none;
@@ -175,18 +155,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================================
-   Design System — Reusable Layout & Component Utilities
+   CANONICAL LAYOUT CONTAINER — single source of truth
+   Every page, header, footer, and overlay MUST use this.
+   max-width : 1280px  (same as Linear, Vercel, Stripe)
+   padding   : 24px mobile → 40px tablet → 64px desktop
    ============================================================ */
+.site-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 768px) {
+  .site-container { padding-inline: 40px; }
+}
+@media (min-width: 1280px) {
+  .site-container { padding-inline: 64px; }
+}
 
-/* Page container — centers content, constrains width */
+/* Legacy alias — identical values */
 .page-container {
   width: 100%;
-  max-width: 1500px;
+  max-width: 1280px;
   margin-inline: auto;
-  padding-inline: 40px;
+  padding-inline: 24px;
   padding-top: 32px;
   padding-bottom: 80px;
 }
+@media (min-width: 768px) {
+  .page-container { padding-inline: 40px; }
+}
+@media (min-width: 1280px) {
+  .page-container { padding-inline: 64px; }
+}
+
+/* ============================================================
+   Component Utilities
+   ============================================================ */
 
 /* Standard card */
 .card {
@@ -221,12 +226,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Section title + description block */
-.section-head {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.section-title {
+.section-head   { display: flex; flex-direction: column; gap: 8px; }
+.section-title  {
   font-size: var(--text-section);
   font-weight: 800;
   color: #ffffff;
@@ -270,16 +271,9 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-btn);
   border: none;
 }
-.btn-primary:hover {
-  filter: brightness(1.1);
-}
-.btn-primary:active {
-  transform: translateY(1px);
-}
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-primary:hover   { filter: brightness(1.1); }
+.btn-primary:active  { transform: translateY(1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Ghost/secondary button */
 .btn-ghost {
@@ -318,12 +312,8 @@ h1, h2, h3, h4, h5, h6 {
   outline: none;
   transition: border-color 0.2s ease;
 }
-.input-base:focus {
-  border-color: #06b6d4;
-}
-.input-base::placeholder {
-  color: #52525b;
-}
+.input-base:focus       { border-color: #06b6d4; }
+.input-base::placeholder { color: #52525b; }
 
 /* Focus visibility for accessibility */
 button:focus-visible,

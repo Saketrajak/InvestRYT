@@ -19,7 +19,7 @@ export default function Home() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full filter blur-[100px] pointer-events-none z-0" />
 
       <div className="fixed inset-0 pointer-events-none flex justify-center z-40">
-        <div className="w-full max-w-[1400px] h-full border-l border-r border-zinc-700/60" />
+        <div className="w-full max-w-[1280px] h-full border-l border-r border-zinc-700/30" />
       </div>
 
       <Header />
@@ -29,7 +29,7 @@ export default function Home() {
       </main>
 
       <footer className="w-full bg-[#09090b] border-t border-[#232326] px-6 py-6 text-center text-xs text-zinc-600 font-light flex flex-col sm:flex-row justify-between items-center gap-4 z-20 relative">
-        <div className="w-full max-w-[1500px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="site-container flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
             &copy; 2026 Investryt AI. All rights reserved. Developed for InsideIIM &times; Altuni AI Labs.
           </div>

@@ -87,7 +87,7 @@ function SearchContent() {
       <Header showNewResearch onNewResearch={handleNewResearch} />
 
       {error && (
-        <div className="max-w-5xl mx-auto w-full px-8 mt-8 relative z-10">
+        <div className="site-container mt-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ function SearchContent() {
       )}
 
       <main className="flex-1 w-full relative z-10 flex flex-col overflow-hidden py-6">
-        <div className="flex-1 w-full max-w-[1520px] mx-auto px-8 lg:px-10 flex gap-6 relative h-[calc(100vh-140px)]">
+        <div className="flex-1 w-full site-container flex gap-6 relative h-[calc(100vh-140px)]">
           {/* Left Panel: Workflow Pipeline */}
           <motion.div
             animate={{ width: pipelineCollapsed ? 64 : 280 }}
