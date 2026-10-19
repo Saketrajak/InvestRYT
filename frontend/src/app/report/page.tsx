@@ -98,7 +98,7 @@ function ReportContent() {
       <div className="min-h-[100dvh] bg-[#060608] text-zinc-300 flex flex-col relative">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.015] pointer-events-none" />
         <Header />
-        <main className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-12 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
